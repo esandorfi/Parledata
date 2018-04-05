@@ -13,8 +13,25 @@ def loginit(fdebug = 0, fname = ''):
 	if( fname == ''):
 		fname = verPackage
 	flevel = logging.INFO if fdebug == 0 else logging.DEBUG
-	logging.basicConfig(level=flevel)
+
+
+	logging.basicConfig(format='%(filename)s:%(lineno)-4d %(levelname)-6s %(message)s',
+    	datefmt='%d-%m-%Y:%H:%M:%S',
+    	level=flevel)
+	#logging.basicConfig(format='%(asctime)s %(filename)s:%(lineno)-4d %(levelname)-6s %(message)s',
+    #	datefmt='%d-%m-%Y:%H:%M:%S',
+    #	level=flevel)
+
+
+
+	#logging.basicConfig(format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)d %(message)s', datefmt='%d-%m-%Y:%H:%M:%S', level=flevel)
 	logger = logging.getLogger(fname)
+	fh = logging.FileHandler(verPackage+'.log')
+	#fh.setlevel(logging.DEBUG)
+
+	#ch = logging.StreamHandler()
+	#logger.addHandler(fh)
+	logger.addHandler(fh)
 	return logger
 
 def loglevel(fdebug = 0):

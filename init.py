@@ -47,7 +47,11 @@ WEBMASTER = 'Emmanuel Sandorfi - Recherche et développement python'
 class PlwInit(object):
 	# INIT
 	# SET DEFAULT URLS AND PATH
-	def __init__(self, source, sourcedata, static, root, fw, st, template, contentpath, idxjsonpath, fdebug = 0):
+	def __init__(self, source, sourcedata, static, root, fw, st, template, contentpath, idxjsonpath, homeurl, fdebug = 0):
+		# set datetime
+		self.dtstart = datetime.now()
+
+		# loglevel
 		loglevel(fdebug)
 
 		# init plwtemplate object (jinja)
@@ -57,7 +61,7 @@ class PlwInit(object):
 		self.myData = PlwData(self.myTemplate)
 
 		# init PlwScan (index content)
-		self.myScan = PlwScan()
+		self.myScan = PlwScan(idxjsonpath)
 
 		# dict for index generated from plwidx.scan call,
 		# used after in plwdata as { idxname : json full pathname }
@@ -68,17 +72,13 @@ class PlwInit(object):
 		if not source [-1] == '\\':
 			source = source + '\\'
 		self.static = static
+		self.myData.home_url = homeurl
 		self.myData.source_path = source
 		self.original_source_path = source
 		self.myData.source_data = sourcedata
 		self.myData.content_path = contentpath
 		# path in static dir where idx json files are generated
 		self.myData.idxjson_path = idxjsonpath
-
-		logger.info("# source_path : "+source)
-		logger.info("# source_data : "+sourcedata)
-		logger.info("# content_path : "+contentpath)
-		logger.info("# idxjson_path : "+contentpath)
 
 		# url defined for jinja templates
 		self.myData.root_url = root
@@ -94,8 +94,13 @@ class PlwInit(object):
 		self.stopIfError = False
 		self.noError = True
 
-		# set datetime
-		self.dtstart = datetime.now()
+		# log variables
+		logger.info("# source_path : "+self.original_source_path)
+		logger.info("# source_data : "+self.myData.source_data)
+		logger.info("# content_path : "+self.myData.content_path)
+		logger.info("# idxjson_path : "+self.myData.idxjson_path)
+		logger.info("# static_url : "+self.myData.static_url)
+		logger.info("# home_url : "+self.myData.home_url)
 
 	def __del__(self):
 		dtend = datetime.now()
@@ -110,7 +115,7 @@ class PlwInit(object):
 
 	# ROUTE
 	# GENERATE HTML FILE
-	def route(self, fdata, ftemplate, fhtml):
+	def route(self, fdata, ftemplate, fhtml = ''):
 		if self.stopIfError is True and self.noError is False:
 			logger.critical("Previous error - skip next file : "+fhtml)
 			return False
@@ -161,6 +166,7 @@ class PlwInit(object):
 				tmppath = self.static+"\\"+ffolder
 		#no need ## self.myData.static_url = self.static_url +ffolder+"/"
 		self.myTemplate.set_staticpath(tmppath)
+
 
 	# PROFILE
 	#	SET SHARED COMMUN INFORMATION FROM A SPECIFIC FILE
