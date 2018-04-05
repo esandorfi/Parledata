@@ -7,7 +7,7 @@ import logging
 from .log import logger
 
 # GET URL
-#	input:
+#	input:   
 #	from sourcefile
 #	where has to be created in static path
 # 	what is the url to static root
