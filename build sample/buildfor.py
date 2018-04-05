@@ -1,4 +1,4 @@
-# BUILD V2
+# BUILD V1
 # DATA SETTINGS
 profile_path = "py-parleweb"
 main_path = "c:\\WWW-Git\\"+profile_path
@@ -52,8 +52,7 @@ else:
     static_path = main_path+"\\"
 
 # tmp dir for plwidx generation
-static_idx_path = static_path+"\\static\\idx\\"
-input_idx_path = input_path+"\\idx\\"
+static_idx_path = static_path+"\\static\\zen\\idx\\"
 
 #
 # INITIALIZE
@@ -100,37 +99,36 @@ myZen.route("ui\\vide.md", "ui-media/svg-pattern.html", "svg-pattern")
 myZen.route("ui\\form-newsletter.md", "ui-form-newsletter", "newsletter")
 myZen.route("ui\\vide.md", "ui/nav-top", "oo\\navigation")
 myZen.route("ui\\vide.md", "ui/js-parladata.js", "oo\\parladata.js")
-
-myZen.route("rd\\emmanuel-sandorfi\\valeurs.md", "page-simple", "rd-emmanuel-sandorfi")
-myZen.route("rd\\parladata\\parladata.md", "page-simple", "rd-parladata-python")
-myZen.route("rd\\methodologie\\cahier des charges.md", "page-simple", "rd-cahier-des-charges")
-myZen.route("rd\\methodologie\\plan de communication.md", "page-simple", "rd-plan-de-communication")
 myZen.closeidx()
+
 """
+
+# RD
+myZen.route("rd\\emmanuel sandorfi\\index.md", "page-simple")
+myZen.route("rd\\parladata\\index.md", "page-simple")
+myZen.route("rd\\methodologie\\cahier des charges.md", "page-simple")
+myZen.route("rd\\methodologie\\plan de communication.md", "page-simple")
+
 
 
 # FORMATION
-myZen.route("formation\\index.md", "page-scan", "formation\\index")
-myZen.route("formation\\optimiser prestashop\\index.md", "page-scan", "formation\\prestashop")
-myZen.route("formation\\programmation culturelle\\index.md", "page-scan", "formation\\publier-diffuser-une-programmation-culturelle")
-myZen.route("formation\\site culturel\\index.md", "page-scan", "formation\\site-culturel")
-
-
+myZen.route("formation\\index.md", "page-scan")
+myZen.route("formation\\optimiser prestashop\\index.md", "page-scan")
+myZen.route("formation\\programmation culturelle\\index.md", "page-scan")
+myZen.route("formation\\site culturel\\index.md", "page-scan")
 
 
 
 # BLOG-CODE
-
-myZen.route("blog-code\\index.md", "page-index", "blog\\index")
-myZen.route("blog-code\\seo\\index.md", "page-index", "blog\\seo")
-myZen.route("blog-code\\outils\\index.md", "page-index", "blog\\outils")
-myZen.route("blog-code\\ui-ux\\index.md", "page-index", "blog\\ui-ux")
-myZen.route("blog-code\\python\\index.md", "page-index", "blog\\python")
+myZen.route("blog-code\\index.md", "page-index")
+myZen.route("blog-code\\seo\\index.md", "page-index")
+myZen.route("blog-code\\outils\\index.md", "page-index")
+myZen.route("blog-code\\ui-ux\\index.md", "page-index")
+myZen.route("blog-code\\python\\index.md", "page-index")
 
 
 # INDEX HOME PAGE
 myZen.pushstatic()
-
 myZen.route("plw-vitrine\\landingv3.md", "landingv3", "index")
 
 if myZen.noError == True:

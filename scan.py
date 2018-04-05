@@ -17,6 +17,7 @@ from pprint import pprint
 
 # parladata package
 from .log import logger
+from .misc import plw_get_url
 
 
 #
@@ -35,16 +36,16 @@ class PlwScan(object):
 
 	def openidx(self, name):
 		if( self.routeisopen == True ):
-			logger.info("SCAN is opened - skip or need to close first")
+			#logger.info("SCAN is opened - skip or need to close first")
 			return False
 		self.routeisopen = True
 		self.routeidxname = name
-		logger.info("IDX OPEN for "+name)
+		#logger.info("IDX OPEN for "+name)
 		return True
 
 	def closeidx(self):
 		if( self.routeisopen == False ):
-			logger.info("SCAN not opened - skip")
+			#logger.info("SCAN not opened - skip")
 			return False
 		logger.info("IDX "+self.routeidxname+ " has "+str(len(self.routeidx)))
 		print(self.routeidx)
@@ -52,7 +53,7 @@ class PlwScan(object):
 
 	def addidx(self, plwd):
 		if( self.routeisopen == False ):
-			logger.info("SCAN not opened - skip")
+			#logger.info("SCAN not opened - skip")
 			return False
 
 		info = {}
@@ -129,7 +130,7 @@ class PlwScan(object):
 							tocid = '.'.join(map(str, self.scanid))
 							logger.debug("SCAN "+tocid+" FOR "+scanfor)
 							i = 1
-							self.toclist[tocid]['file'] = {}
+							self.toclist[tocid]['scan'] = {}
 							for filename in files:
 								if i > 1:
 									#self.countid += 1
@@ -169,11 +170,12 @@ class PlwScan(object):
 			data['deepsame'] = samelevel
 			lastdeep = data['deep']
 
-		self.htmldir()
-		jsonfullfilename = self.static_idx_path+jsonfile
-		self.jsondir(jsonfullfilename)
-
-		return jsonfullfilename
+		# write json
+		#self.htmldir()
+		if jsonfile.find('.json') == -1:
+			jsonfile += '.json'
+		self.jsondir(jsonfile)
+		return jsonfile
 
 
 	def htmldir(self):
@@ -245,9 +247,9 @@ class PlwScan(object):
 				statinfo = os.stat(fname)
 				logger.info(" file: "+fname+" size: "+str(statinfo.st_size))
 				#info = self.toclist[tocid]
-				info = {'file':fname}
+				#info = {'file':fname}
 				#info['file'] = fname
-				info['filesize'] = statinfo.st_size
+				#info['filesize'] = statinfo.st_size
 
 				# load markdown
 				logger.info("load markdown file "+ fname)
@@ -255,13 +257,15 @@ class PlwScan(object):
 				if not html:
 					logger.info("error in markdown file :"+fname)
 					return False
+
+				url = plw_get_url(fname)
+				html.metadata['url'] = url[0]
 				html.metadata['content'] = html
-				info['metadata'] = html.metadata
+				html.metadata['scanfile'] = fname
+				html.metadata['scanfilesize'] = statinfo.st_size
 
-
-
-				self.toclist[tocid]['file'][i] = {}
-				self.toclist[tocid]['file'][i] = info
+				self.toclist[tocid]['scan'][i] = {}
+				self.toclist[tocid]['scan'][i] = html.metadata
 			except ValueError as e:
 				logger.critical("Error as "+str(e))
 				return False

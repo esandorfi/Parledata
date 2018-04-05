@@ -7,7 +7,7 @@ import logging
 from .log import logger
 
 # GET URL
-#	input:   
+#	input:
 #	from sourcefile
 #	where has to be created in static path
 # 	what is the url to static root
@@ -15,7 +15,7 @@ from .log import logger
 #	output: (list)
 #	url
 #	full filename
-def plw_get_url(sourcefile, static_path, static_url):
+def plw_get_url(sourcefile, static_path='', static_url=''):
 	logger.info("SOURCE FILE IS "+sourcefile)
 	# remove extension
 	if sourcefile.find('.'):

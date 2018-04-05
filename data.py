@@ -122,7 +122,7 @@ class PlwData(object):
 
 	# ZENSCAN
 	def zenscan(self, scanname, scanfor, sourcedata):
-		idxfilename = self.myScan.scan(sourcedata, scanfor, scanname)
+		idxfilename = self.myScan.scan(sourcedata, scanfor, self.idxjson_path+scanname)
 		if idxfilename == '' :
 			logger.critical("Error in idx generation with sourcedata "+sourcedata)
 			return False
@@ -269,10 +269,18 @@ class PlwData(object):
 
 		if( '.' in curstatic ):
 			myStaticfile = self.config.static_path+curstatic
-			myJsonfile = myStaticfile.partition('.')[-1]+".json"
+			myJsonfile = myStaticfile.partition('.')[0]+".json"
+		elif curstatic == '':
+			myStaticfile = self.url[1]
+			if( '.' in myStaticfile ):
+				myJsonfile = myStaticfile.partition('.')[0]+".json"
+			else:
+				myJsonfile = myStaticfile+".json"
 		else:
 			myStaticfile = self.config.static_path+curstatic + ".html"
 			myJsonfile = self.config.static_path+curstatic + ".json"
+		logger.info("HTML FILE  "+myStaticfile)
+		logger.info("JSON FILE "+myJsonfile)
 
 		# generate static html file from data and template
 		try:
@@ -284,7 +292,11 @@ class PlwData(object):
 			except FileNotFoundError as e:
 				getdir = os.path.dirname(myStaticfile)
 				logger.info("create directory "+getdir+" from "+myStaticfile)
-				os.mkdir(getdir, 0o777)
+				try:
+					os.makedirs(getdir, 0o777)
+				except OSError as e:
+					if e.errno != errno.EEXIST:
+						raise
 				myFile = open(myStaticfile, "w", encoding='utf-8')
 			myFile.write(html)
 			myFile.close()
