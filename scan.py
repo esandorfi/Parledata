@@ -194,7 +194,7 @@ class PlwScan(object):
 			getdir = os.path.dirname(fout)
 			logger.info("create directory "+getdir+" from "+fout)
 			try:
-				os.mkdir(getdir)
+				os.mkdir(getdir, 0o777)
 				myFile = open(fout, "w", encoding='utf-8')
 			except FileNotFoundError as e:
 				logger.critical("impossible to use file "+fout)

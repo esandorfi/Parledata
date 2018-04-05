@@ -17,6 +17,8 @@ from pprint import pprint
 # parladata package
 from .log import logger
 from .scan import PlwScan
+from .misc import plw_get_url
+
 
 # OBJECT PLWDATA
 #	load
@@ -127,6 +129,36 @@ class PlwData(object):
 		self.load_json(scanname, idxfilename)
 		return True
 
+	# GET URL
+	#	from sourcefile
+	#	where has to be created in static path
+	# 	what is the url to static root
+	def xget_url(self, sourcefile, static_path, static_url):
+		logger.info("SOURCE FILE IS "+sourcefile)
+		# remove extension
+		if sourcefile.find('.'):
+			filename = sourcefile.split('.')[0]+'.html'
+		else:
+			filename = sourcefile+'.html'
+
+		fullfilename = static_path+filename
+		logger.info("FULL FILENAME IN STATIC PATH IS "+fullfilename)
+
+		path = os.path.dirname(fullfilename)
+		if not os.path.exists(path):
+			logger.info("PATH DOES NOT EXIST "+path)
+		else:
+			logger.info("PATH IS "+path)
+
+		# check if index
+		if sourcefile.find('index'):
+			filename = filename.split('index')[0]
+
+		url = (static_url + filename).replace('\\', '/')
+		logger.info("SOURCE URL IS "+url)
+		return [ url, fullfilename ]
+
+
 	# LOAD_MARKDOWN
 	#	data from markdown file
 	def load_markdown(self, fdata):
@@ -135,6 +167,8 @@ class PlwData(object):
 		tmpsourceurl = fdata.partition('\\')[0]
 		self.source_pathdata = self.source_path+tmpsourceurl+'\\'
 		datafile = self.source_path+fdata
+
+		self.url = plw_get_url(fdata, self.config.static_path, self.static_url) # url, filename
 
 		"""
 		logger.debug("fdata "+fdata)
@@ -165,9 +199,10 @@ class PlwData(object):
 		html.metadata['sourcedata'] = self.source_data
 		html.metadata['sourceurl'] = self.content_path+"/"+tmpsourceurl + "/"
 		html.metadata['staticurl'] = self.static_url
+		html.metadata['url'] = self.url[0]
 		html.metadata['webmaster'] = self.webmaster
-		logger.debug("sourceurl : "+html.metadata['sourceurl'])
-		logger.debug("staticurl : "+html.metadata['staticurl'])
+		logger.info("sourceurl : "+html.metadata['sourceurl'])
+		logger.info("staticurl : "+html.metadata['staticurl'])
 
 		# check for metadata
 
@@ -228,6 +263,10 @@ class PlwData(object):
 
 		# write data
 		# 	check if curstatic have '.', if not add '.html'
+		logger.info("DATA URL "+self.url[0]+" OUT "+self.url[1])
+
+
+
 		if( '.' in curstatic ):
 			myStaticfile = self.config.static_path+curstatic
 			myJsonfile = myStaticfile.partition('.')[-1]+".json"
@@ -245,7 +284,7 @@ class PlwData(object):
 			except FileNotFoundError as e:
 				getdir = os.path.dirname(myStaticfile)
 				logger.info("create directory "+getdir+" from "+myStaticfile)
-				os.mkdir(getdir)
+				os.mkdir(getdir, 0o777)
 				myFile = open(myStaticfile, "w", encoding='utf-8')
 			myFile.write(html)
 			myFile.close()
