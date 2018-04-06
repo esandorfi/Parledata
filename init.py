@@ -47,7 +47,11 @@ WEBMASTER = 'Emmanuel Sandorfi - Recherche et développement python'
 class PlwInit(object):
 	# INIT
 	# SET DEFAULT URLS AND PATH
+<<<<<<< HEAD
 	def __init__(self, source, sourcedata, static, root, fw, st, template, contentpath, idxjsonpath, homeurl, fdebug = 0):
+=======
+	def __init__(self, source, sourcedata, static, root, fw, st, template, contentpath, idxjsonpath, fdebug = 0):
+>>>>>>> 5622b50240495c973049e191bc17b9ffa0e3a29c
 		# set datetime
 		self.dtstart = datetime.now()
 
@@ -100,7 +104,10 @@ class PlwInit(object):
 		logger.info("# content_path : "+self.myData.content_path)
 		logger.info("# idxjson_path : "+self.myData.idxjson_path)
 		logger.info("# static_url : "+self.myData.static_url)
+<<<<<<< HEAD
 		logger.info("# home_url : "+self.myData.home_url)
+=======
+>>>>>>> 5622b50240495c973049e191bc17b9ffa0e3a29c
 
 	def __del__(self):
 		dtend = datetime.now()
