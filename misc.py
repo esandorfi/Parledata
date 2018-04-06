@@ -15,26 +15,36 @@ from .log import logger
 #	output: (list)
 #	url
 #	full filename
-def plw_get_url(sourcefile, static_path='', static_url=''):
-	logger.info("SOURCE FILE IS "+sourcefile)
+def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
+	logger.info("# source file: "+sourcefile)
 	# remove extension
 	if sourcefile.find('.'):
 		filename = sourcefile.split('.')[0]+'.html'
 	else:
 		filename = sourcefile+'.html'
+
+	# remove source_path if any
+	if source_path != '':
+		n = filename.find(source_path)
+		#logger.info('n '+str(n)+' source '+source_path)
+		if n == 0:
+			filename = filename[len(source_path):]
+
+
+
 	fullfilename = static_path+filename
-	logger.info("FULL FILENAME IN STATIC PATH IS "+fullfilename)
+	logger.debug("static file: "+fullfilename)
 
 	path = os.path.dirname(fullfilename)
 	if not os.path.exists(path):
-		logger.info("PATH DOES NOT EXIST "+path)
-	else:
-		logger.info("PATH IS "+path)
+		logger.debug("path does not exist : "+path)
+	#else:
+	#	logger.info("PATH IS "+path)
 
 	# check if index
 	if sourcefile.find('index'):
 		filename = filename.split('index')[0]
 
 	url = (static_url + filename).replace('\\', '/')
-	logger.info("SOURCE URL IS "+url)
+	logger.info("url: "+url)
 	return [ url, fullfilename ]

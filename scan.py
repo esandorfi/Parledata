@@ -31,6 +31,14 @@ class PlwScan(object):
 		self.routeidxname = ""
 		self.routeisopen = False
 
+		# set by scanoption()
+		self.static_path = '' # where html is generated
+		self.static_url = ''  # which server is used to load web pages
+		self.source_path = '' # what is the drive path
+
+		# set by activeurl()
+		self.active_url = '' # current url managed by PlwData
+
 	def __del__(self):
 		pass
 
@@ -76,11 +84,14 @@ class PlwScan(object):
 		return True
 
 
-	def scan(self, sourcedir, scanfor = '', jsonfile = "idx.json"):
-		logger.info("IDX SCAN source %s for %s" %(sourcedir, scanfor))
+	def scan(self, sourcedir, scanfor = '', scanoption = '@NONE', jsonfile = "idx.json"):
+		#if sourcedir[-1:] == '\\':
+		#	sourcedir = sourcedir[:-1]
+		logger.info("ZENSCAN source %s for %s (option %s)" %(sourcedir, scanfor, scanoption))
+		isScanOnlyfiles = scanoption.lower().find('@files')
 		try:
 			for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
-
+				logger.debug("scan find directory : %s", dirpath)
 				nbgeneration = dirpath.count('\\')
 
 				# root
@@ -91,10 +102,12 @@ class PlwScan(object):
 					self.parent = 0
 					self.idx = self.idxroot
 					self.scanid = []
+					self.scanid.append(1) # check if ok
 					self.lenidbefore = 0
 					self.countid = 1
 					self.tochtml = []
 					self.toclist = {}
+					self.breadcrump = []
 				else:
 				# parent and child numerotation into list scanid as [1, 1, 2, 1...]
 					if( self.parent != nbgeneration ):
@@ -102,6 +115,11 @@ class PlwScan(object):
 							# previous generation
 							idtoremove = self.parent-nbgeneration
 							del self.scanid[-idtoremove:]
+							logger.info('breadcrump len '+str(len(self.breadcrump)))
+							idtoremove += 1
+							del self.breadcrump[-idtoremove:]
+							logger.info('breadcrump len '+str(len(self.breadcrump)))
+							logger.info("previous generation nb to remove "+str(idtoremove))
 							self.countid = self.scanid[-1] + 1
 							self.scanid[-1] = self.countid
 						else:
@@ -115,23 +133,27 @@ class PlwScan(object):
 							self.scanid[-1] = self.countid
 						else:
 							self.scanid.append(self.countid)
+						del self.breadcrump[-1:]
+
 
 					self.generation = nbgeneration
 					self.idx = dirpath.split(self.idxroot+'\\')[-1].split('\\')[-1]
 					self.curdirnum = dirnum
+					self.breadcrump.append(self.idx)
+					logger.info("add breadcrump "+self.idx +" len "+str(len(self.breadcrump))+" breadcrump "+'>'.join(self.breadcrump))
 
-					# add to scan memory the directory
-
-					if( len(files) > 0 ):
-						self.scandir(dirpath, dirs, files)
-						# just pure number without .
-						self.lenidbefore = len(''.join(map(str, self.scanid)))
-						if( scanfor != '' ):
-							tocid = '.'.join(map(str, self.scanid))
-							logger.debug("SCAN "+tocid+" FOR "+scanfor)
-							i = 1
-							self.toclist[tocid]['scan'] = {}
-							for filename in files:
+				# add to scan memory the directory
+				if( len(files) > 0 ):
+					self.scandir(dirpath, dirs, files)
+					# just pure number without .
+					self.lenidbefore = len(''.join(map(str, self.scanid)))
+					if( scanfor != '' ):
+						tocid = '.'.join(map(str, self.scanid))
+						logger.debug("SCAN "+tocid+" FOR "+scanfor)
+						i = 1
+						self.toclist[tocid]['scan'] = {}
+						for filename in files:
+							if filename.rfind(scanfor) != -1:
 								if i > 1:
 									#self.countid += 1
 									#self.scanid.append(self.countid)
@@ -143,6 +165,14 @@ class PlwScan(object):
 								else:
 									logger.critical("error walking file : "+filename)
 									return ''
+
+				self.toclist[tocid]['breadcrump'] = list(self.breadcrump)
+				self.toclist[tocid]['scanlen'] = len(self.toclist[tocid]['scan'])
+				if isScanOnlyfiles != -1:
+					logger.debug("scan only files - option set with @files")
+					break
+
+
 
 		except ValueError as e:
 			logger.critical("error walking dir : "+sourcedir+" "+str(e))
@@ -164,7 +194,7 @@ class PlwScan(object):
 				samelevel = 1
 			else:
 				samelevel = 0
-			logger.info( 'deep %d before %d lastdeep %d close %d open %d same %d - %s' %(data['deep'], data['deepbefore'], lastdeep, closelevel, openlevel, samelevel, keyid))
+			logger.debug( 'deep %d before %d lastdeep %d close %d open %d same %d - %s' %(data['deep'], data['deepbefore'], lastdeep, closelevel, openlevel, samelevel, keyid))
 			data['deepopen'] = openlevel
 			data['deepclose'] = closelevel
 			data['deepsame'] = samelevel
@@ -196,11 +226,14 @@ class PlwScan(object):
 			getdir = os.path.dirname(fout)
 			logger.info("create directory "+getdir+" from "+fout)
 			try:
-				os.mkdir(getdir, 0o777)
-				myFile = open(fout, "w", encoding='utf-8')
-			except FileNotFoundError as e:
-				logger.critical("impossible to use file "+fout)
-				return False
+				os.makedirs(getdir, 0o777)
+				try:
+					myFile = open(fout, "w", encoding='utf-8')
+				except FileNotFoundError as e:
+					logger.critical("impossible to use file "+fout)
+					return False
+			except:
+				raise
 			#
 			# more error check to add
 			#
@@ -222,7 +255,6 @@ class PlwScan(object):
 		info = {}
 		info['folder'] = self.idx
 		info['nbfiles'] = nbfiles
-		info['url'] = 'url to add'
 
 		# manage deep as
 		# <li>
@@ -236,7 +268,7 @@ class PlwScan(object):
 		logger.debug(info)
 		self.toclist[scanid] = info
 		#self.toclist[scanid] = ( self.idx, nbfiles, 'url to add' )
-		logger.info("IDX %s %s%s" %(str(self.scanid), self.idx, " ("+str(nbfiles)+")" if nbfiles > 0 else ""))
+		logger.debug("IDX %s %s%s" %(str(self.scanid), self.idx, " ("+str(nbfiles)+")" if nbfiles > 0 else ""))
 		self.tochtml.append("%s %s%s" %(str(self.scanid), self.idx, " ("+str(nbfiles)+")" if nbfiles > 0 else ""))
 		#return scanid
 
@@ -245,27 +277,32 @@ class PlwScan(object):
 		if fname.endswith(scanfor):
 			try:
 				statinfo = os.stat(fname)
-				logger.info(" file: "+fname+" size: "+str(statinfo.st_size))
+				logger.debug(" file: "+fname+" size: "+str(statinfo.st_size))
 				#info = self.toclist[tocid]
 				#info = {'file':fname}
 				#info['file'] = fname
 				#info['filesize'] = statinfo.st_size
 
 				# load markdown
-				logger.info("load markdown file "+ fname)
-				html = markdown2.markdown_path(fname, extras=["header-ids", "metadata", "toc"])
+				logger.debug("load markdown file from scan "+ fname)
+				html = markdown2.markdown_path(fname, extras=["metadata", "markdown-in-html", "tables"])
 				if not html:
-					logger.info("error in markdown file :"+fname)
+					logger.critical("error in markdown file from scan :"+fname)
 					return False
 
-				url = plw_get_url(fname)
+				url = plw_get_url(fname, self.static_path, self.static_url, self.source_path)
+				logger.info('url %s file %s' %(url[0], url[1]))
 				html.metadata['url'] = url[0]
 				html.metadata['content'] = html
-				html.metadata['scanfile'] = fname
-				html.metadata['scanfilesize'] = statinfo.st_size
+				#html.metadata['scanfile'] = fname
+				html.metadata['contentsize'] = statinfo.st_size
 
-				self.toclist[tocid]['scan'][i] = {}
-				self.toclist[tocid]['scan'][i] = html.metadata
+				logger.info('active url %s and %s' %(self.active_url, url[0]))
+				if( self.active_url != '' and self.active_url == url[0] ):
+					logger.info('not include file as active url : ' + self.active_url)
+				else:
+					self.toclist[tocid]['scan'][i] = {}
+					self.toclist[tocid]['scan'][i] = html.metadata
 			except ValueError as e:
 				logger.critical("Error as "+str(e))
 				return False
@@ -273,7 +310,17 @@ class PlwScan(object):
 		else:
 			return False
 
+	# SCANOPTION
+	#	set path for plw_get_url
+	def scanoption(self, static_path, static_url, source_path):
+		self.static_path = static_path
+		self.static_url = static_url
+		self.source_path = source_path
 
+	# ACTIVE URL
+	#	set active url (for not include in scan)
+	def activeurl(self, url):
+		self.active_url = url
 
 # MAIN
 #

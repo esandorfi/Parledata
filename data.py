@@ -53,9 +53,17 @@ class PlwData(object):
 			return False
 
 		tmplist = []
-		for each in reader:
-			#logger.debug(each)
-			tmplist.append(each)
+		try:
+			for each in reader:
+				#logger.debug(each)
+				tmplist.append(each)
+		except UnicodeDecodeError as e:
+			logger.critical("CSV WRONG FORMAT - "+str(e))
+			return False
+
+		except:
+			logger.critical("CSV WRONG FORMAT")
+			raise
 
 		self.idx[metakey] = tmplist
 		self.idxcount += 1
@@ -89,7 +97,7 @@ class PlwData(object):
 	#	ZENSCAN 	scan and load json
 	def check_metadata(self, keyname, keydata, htmlmetadata):
 		if keyname[:6] == 'zencsv':
-			logger.debug("FIND META zencsv as key %s value %s" % (keyname, keydata))
+			logger.info("%s: %s" % (keyname, keydata))
 			if keydata.find('.') == -1:
 				logger.warning("META file doesn't have extension !")
 			if( self.load_csv(keyname, keydata) == False ):
@@ -99,64 +107,39 @@ class PlwData(object):
 			if keydata.find('.') == -1:
 				keydata += '.json'
 			try:
-				scanname, scanfor = keydata.split(' ')
+				scanname, scanfor, scanoption = keydata.split(' ')
 			except:
-				logger.critical("ZENSCAN has two arguments separated by space : [file generated] [extension to search]")
-				logger.critical("Example as follow ZENSCAN: FILETOCREATE .MD")
+				logger.critical("ZENSCAN has 3 arguments separated by space : [json filename generated] [extension to search] [options]")
+				logger.critical("ZENSCAN: [FILETOCREATE.JSON] [.MD] [@ALL|@FILES]")
+				logger.critical("zenscan: myscan .md @files")
 				return False
-			sourcedata = htmlmetadata['sourceurl']
-			logger.debug("FIND META zenscan as key %s filename %s scanfor %s" % (keyname, scanname, scanfor))
-			if( self.zenscan(scanname, scanfor, sourcedata) == False ):
+			sourcedata = self.source_pathdata #htmlmetadata['sourceurl']
+			logger.info("%s: %s %s %s" % (keyname, scanname, scanfor, scanoption))
+			if( self.zenscan(scanname, scanfor, scanoption, sourcedata) == False ):
 				return False
-			else:
-				htmlmetadata[keyname] = scanname
+			#else:
+			#	htmlmetadata[keyname] = scanname # multiiple zenscan issue
 
 		elif keyname[:7] == 'zenjson':
 			if keydata.find('.') == -1:
 				keydata += '.json'
-			logger.debug("FIND META zenjson as key %s value %s" % (keyname, keydata))
+			logger.info("%s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, self.idxjson_path+keydata) == False ):
 				return False
 
 		return True
 
 	# ZENSCAN
-	def zenscan(self, scanname, scanfor, sourcedata):
-		idxfilename = self.myScan.scan(sourcedata, scanfor, self.idxjson_path+scanname)
+	def zenscan(self, scanname, scanfor, scanoption, sourcedata):
+		self.myScan.scanoption(self.config.static_path, self.static_url, self.source_path)
+		self.myScan.activeurl(self.url[0])
+		idxfilename = self.myScan.scan(sourcedata, scanfor, scanoption, self.idxjson_path+scanname)
+		self.myScan.activeurl('')
 		if idxfilename == '' :
 			logger.critical("Error in idx generation with sourcedata "+sourcedata)
 			return False
-		self.load_json(scanname, idxfilename)
-		return True
+		return self.load_json("zenscan", idxfilename) # add multiple zenscan issue in future
 
-	# GET URL
-	#	from sourcefile
-	#	where has to be created in static path
-	# 	what is the url to static root
-	def xget_url(self, sourcefile, static_path, static_url):
-		logger.info("SOURCE FILE IS "+sourcefile)
-		# remove extension
-		if sourcefile.find('.'):
-			filename = sourcefile.split('.')[0]+'.html'
-		else:
-			filename = sourcefile+'.html'
-
-		fullfilename = static_path+filename
-		logger.info("FULL FILENAME IN STATIC PATH IS "+fullfilename)
-
-		path = os.path.dirname(fullfilename)
-		if not os.path.exists(path):
-			logger.info("PATH DOES NOT EXIST "+path)
-		else:
-			logger.info("PATH IS "+path)
-
-		# check if index
-		if sourcefile.find('index'):
-			filename = filename.split('index')[0]
-
-		url = (static_url + filename).replace('\\', '/')
-		logger.info("SOURCE URL IS "+url)
-		return [ url, fullfilename ]
 
 
 	# LOAD_MARKDOWN
@@ -164,18 +147,19 @@ class PlwData(object):
 	def load_markdown(self, fdata):
 
 		# set data filepath
-		tmpsourceurl = fdata.partition('\\')[0]
+		#tmpsourceurl = fdata.partition('\\')[-1]
+		tmpsourceurl = os.path.dirname(fdata)
 		self.source_pathdata = self.source_path+tmpsourceurl+'\\'
 		datafile = self.source_path+fdata
 
 		self.url = plw_get_url(fdata, self.config.static_path, self.static_url) # url, filename
 
-		"""
+
 		logger.debug("fdata "+fdata)
 		logger.debug("tmpsourceurl "+tmpsourceurl)
 		logger.debug("source_pathdata "+self.source_pathdata)
 		logger.debug("source_path "+self.source_path)
-		"""
+
 
 		# verify if data metadata still in memory
 		if self.idxcount > 0:
@@ -183,11 +167,13 @@ class PlwData(object):
 			self.idx.clear()
 
 		# load markdown
-		logger.info("load markdown file "+ datafile)
+		logger.debug("load markdown file "+ datafile)
 		if not os.path.exists(datafile):
 			logger.critical("data file doesn't exist :"+datafile)
 			return False
-		html = markdown2.markdown_path(datafile, extras=["header-ids", "metadata", "toc"])
+		htmlclass = {'table' : 'table is-hoverable'}
+		#html = markdown2.markdown_path(datafile, extras=["header-ids", "metadata", "toc", "markdown-in-html", "tables"])
+		html = markdown2.markdown_path(datafile, extras={"metadata":None, "toc":None, "markdown-in-html":None, "tables":None, "html-classes":htmlclass})
 		if not html:
 			logger.info("error in markdown file :"+datafile)
 			return False
@@ -202,8 +188,8 @@ class PlwData(object):
 		html.metadata['staticurl'] = self.static_url
 		html.metadata['url'] = self.url[0]
 		html.metadata['webmaster'] = self.webmaster
-		logger.info("sourceurl : "+html.metadata['sourceurl'])
-		logger.info("staticurl : "+html.metadata['staticurl'])
+		#logger.info("sourceurl : "+html.metadata['sourceurl'])
+		#logger.info("staticurl : "+html.metadata['staticurl'])
 
 		# check for metadata
 
@@ -213,7 +199,7 @@ class PlwData(object):
 
 		# check for index
 		if( self.idxcount > 0 ):
-			logger.info("number of index "+str(self.idxcount))
+			logger.debug("number of index "+str(self.idxcount))
 			for keyname, datavalue in self.idx.items():
 				html.metadata[keyname] = datavalue
 				logger.debug(html.metadata[keyname])
@@ -250,7 +236,10 @@ class PlwData(object):
 		else:
 			tmpfile = curtemplate + ".html"
 
-		myTemplatefile = next((x for x in self.config.templates_env.list_templates() if x == tmpfile ), "index.html")
+		myTemplatefile = next((x for x in self.config.templates_env.list_templates() if x == tmpfile ), "")
+		if myTemplatefile == '':
+			logger.critical("template not found : "+tmpfile)
+			return False
 		logger.info("use template : "+myTemplatefile)
 
 		# load data
@@ -264,7 +253,7 @@ class PlwData(object):
 
 		# write data
 		# 	check if curstatic have '.', if not add '.html'
-		logger.info("DATA URL "+self.url[0]+" OUT "+self.url[1])
+		#logger.info("DATA URL "+self.url[0]+" OUT "+self.url[1])
 
 
 
@@ -280,8 +269,8 @@ class PlwData(object):
 		else:
 			myStaticfile = self.config.static_path+curstatic + ".html"
 			myJsonfile = self.config.static_path+curstatic + ".json"
-		logger.info("HTML FILE  "+myStaticfile)
-		logger.info("JSON FILE "+myJsonfile)
+		#logger.info("HTML FILE  "+myStaticfile)
+		#logger.info("JSON FILE "+myJsonfile)
 
 		# generate static html file from data and template
 		try:

@@ -38,8 +38,8 @@ class PlwTemplate(object):
 		self.static_path = sta
 		if not self.static_path.endswith('\\'):
 			self.static_path = self.static_path + '\\'
-		logger.info("#")
-		logger.info("# static_path : "+self.static_path)
+		logger.debug("#")
+		logger.debug("# static_path : "+self.static_path)
 
 	# IS_VALID
 	def is_valid(self):
