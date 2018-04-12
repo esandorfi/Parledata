@@ -165,7 +165,10 @@ class PlwInit(object):
 				tmppath = self.static+"\\"+ffolder
 		#no need ## self.myData.static_url = self.static_url +ffolder+"/"
 		self.myTemplate.set_staticpath(tmppath)
+		self.myData.static_path = self.myTemplate.static_path
 
+	def getstatic(self):
+		return self.myTemplate.static_path
 
 	# PROFILE
 	#	SET SHARED COMMUN INFORMATION FROM A SPECIFIC FILE

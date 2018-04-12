@@ -29,6 +29,7 @@ class PlwData(object):
 		self.idxcount = 0
 		self.idx = {}
 		self.myScan = PlwScan()
+		self.static_path = objcfg.static_path
 
 	# LOAD
 	#	data from argument
@@ -42,8 +43,10 @@ class PlwData(object):
 	def load_csv(self, metakey, fdata):
 		datafile = self.source_pathdata+fdata
 		if not os.path.exists(datafile):
-			logger.critical("skip csv file - doesn't exist :"+datafile)
-			return False
+			datafile = self.static_path+fdata
+			if not os.path.exists(datafile):
+				logger.critical("skip csv file %s - doesn't exist in %s or in %s " %(fdata, self.source_pathdata, self.static_path))
+				return False
 		logger.info("load csv file "+ datafile)
 		fcsv = open(datafile, 'r', encoding='utf-8')
 		try:
@@ -76,8 +79,10 @@ class PlwData(object):
 	def load_json(self, metakey, fdata):
 		datafile = fdata
 		if not os.path.exists(datafile):
-			logger.critical("skip json file - doesn't exist :"+datafile)
-			return False
+			datafile = self.static_path+fdata
+			if not os.path.exists(datafile):
+				logger.critical("skip json file %s - doesn't exist in %s or in %s " %(datafile, self.source_pathdata, self.static_path))
+				return False
 		logger.info("load json file "+ datafile)
 		fjson = open(datafile, 'r', encoding='utf-8')
 		try:
@@ -100,6 +105,7 @@ class PlwData(object):
 			logger.info("%s: %s" % (keyname, keydata))
 			if keydata.find('.') == -1:
 				logger.warning("META file doesn't have extension !")
+
 			if( self.load_csv(keyname, keydata) == False ):
 				return False
 
@@ -125,6 +131,13 @@ class PlwData(object):
 				keydata += '.json'
 			logger.info("%s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, self.idxjson_path+keydata) == False ):
+				return False
+
+		elif keyname[:6] == 'zenimg':
+			if keydata.find('.') == -1:
+				keydata += '.json'
+			logger.info("%s: %s" % (keyname, keydata))
+			if( self.load_json(keyname, keydata) == False ):
 				return False
 
 		return True
