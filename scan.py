@@ -20,6 +20,9 @@ from .log import logger
 from .misc import plw_get_url
 
 
+class StringMetadata(str):
+	metadata = None
+
 #
 # Generate Index files
 #
@@ -38,6 +41,13 @@ class PlwScan(object):
 
 		# set by activeurl()
 		self.active_url = '' # current url managed by PlwData
+
+		# extension
+		self.extload = {
+			'.md': self.ext_md,
+			'.jpg' : self.ext_img, '.png' : self.ext_img,
+			'.avi' : self.ext_video, '.mp4' : self.ext_video
+		}
 
 	def __del__(self):
 		pass
@@ -272,9 +282,29 @@ class PlwScan(object):
 		self.tochtml.append("%s %s%s" %(str(self.scanid), self.idx, " ("+str(nbfiles)+")" if nbfiles > 0 else ""))
 		#return scanid
 
+	def ext_md(self, fname):
+		logger.debug("load markdown file")
+		html = markdown2.markdown_path(fname, extras=["metadata", "markdown-in-html", "tables"])
+		return html
+
+	def ext_img(self, fname):
+		logger.debug("load image file")
+		html = StringMetadata(fname)
+		html.metadata = { 'filetype' : 'image' }
+		print(html)
+		return html
+
+	def ext_video(self, fname):
+		logger.debug("load video file")
+		html = {}
+		html.metadata = {}
+		return html
+
+
 	def scanfile(self, tocid, scanfor, dirpath, filename, i):
-		fname = os.path.join(dirpath,filename)
-		if fname.endswith(scanfor):
+		fname = os.path.join(dirpath,filename).lower()
+		fnamext = os.path.splitext(fname)[1]
+		if fname.endswith(scanfor.lower()):
 			try:
 				statinfo = os.stat(fname)
 				logger.debug(" file: "+fname+" size: "+str(statinfo.st_size))
@@ -283,11 +313,15 @@ class PlwScan(object):
 				#info['file'] = fname
 				#info['filesize'] = statinfo.st_size
 
-				# load markdown
-				logger.debug("load markdown file from scan "+ fname)
-				html = markdown2.markdown_path(fname, extras=["metadata", "markdown-in-html", "tables"])
+				# select from extension witch function to load
+				loadfunc = self.extload.get(fnamext, lambda fname: False)
+				if( loadfunc == False ):
+					logger.critical("extension not found in parladata definition, skip as a warning")
+					return True
+				html = loadfunc(fname)
+				logger.debug("load "+fnamext+" file from scan "+ fname)
 				if not html:
-					logger.critical("error in markdown file from scan :"+fname)
+					logger.critical("error in "+fnamext+" file from scan :"+fname)
 					return False
 
 				url = plw_get_url(fname, self.static_path, self.static_url, self.source_path)

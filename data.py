@@ -162,17 +162,19 @@ class PlwData(object):
 		# set data filepath
 		#tmpsourceurl = fdata.partition('\\')[-1]
 		tmpsourceurl = os.path.dirname(fdata)
-		self.source_pathdata = self.source_path+tmpsourceurl+'\\'
+		if( tmpsourceurl == '' ):
+			self.source_pathdata = self.source_path
+		else:
+			self.source_pathdata = self.source_path+tmpsourceurl+'\\'
 		datafile = self.source_path+fdata
-
-		self.url = plw_get_url(fdata, self.config.static_path, self.static_url) # url, filename
 
 
 		logger.debug("fdata "+fdata)
 		logger.debug("tmpsourceurl "+tmpsourceurl)
 		logger.debug("source_pathdata "+self.source_pathdata)
-		logger.debug("source_path "+self.source_path)
+		logger.debug("datafile "+datafile)
 
+		self.url = plw_get_url(fdata, self.config.static_path, self.static_url, self.source_path) # url, filename
 
 		# verify if data metadata still in memory
 		if self.idxcount > 0:

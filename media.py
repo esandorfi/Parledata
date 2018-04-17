@@ -34,7 +34,8 @@ class PlwMedia(object):
 	#	resize
 	#	option: @files for only source directory (no subdirs)
 	def scanimage(self, foldername, sourcedir, targetdir, resizeimg = 2.5, resizeimgth = 10, scanfor = '.jpg', scanoption = '@files', jsonfile = "scanimage.json"):
-		targetdir += "\\"
+		if( targetdir[-1] != '\\' ):
+			targetdir += "\\"
 		logger.info("SCANIMAGE source %s to %s for %s (option %s)" %(sourcedir, targetdir, scanfor, scanoption))
 		nbFiles = 0
 		isOk = True
@@ -55,11 +56,29 @@ class PlwMedia(object):
 						nx, ny = img.size
 						logger.debug("image %s format %s width %s mode %s" %(filename, img.format, str(img.size), img.mode))
 
-						newfile = targetdir+filename
-						imgresize = img.resize((int(nx/resizeimg), int(ny/resizeimg)), Image.BICUBIC)
-						imgresize.save(newfile,dpi=(100,100))
+						if( isScanOnlyfiles == -1 ):
+							subdir = dirpath[len(sourcedir):]
+							if subdir[-1] != '\\':
+								subdir += '\\'
+							newfile = targetdir+subdir+filename
+							newfileth = targetdir+subdir+"th-"+filename
+							logger.debug("dir "+dirpath + " subdir "+subdir+" file "+filename)
+						else:
+							newfile = targetdir+filename
+							newfileth = targetdir+"th-"+filename
 
-						newfileth = targetdir+"th-"+filename
+						imgresize = img.resize((int(nx/resizeimg), int(ny/resizeimg)), Image.BICUBIC)
+						try:
+							imgresize.save(newfile,dpi=(100,100))
+						except FileNotFoundError:
+							getdir = os.path.dirname(newfile)
+							logger.info("create directory "+getdir+" from "+newfile)
+							try:
+								os.makedirs(getdir, 0o777)
+								imgresize.save(newfile,dpi=(100,100))
+							except:
+								raise
+
 						imgresizeth = img.resize((int(nx/resizeimgth), int(ny/resizeimgth)), Image.BICUBIC)
 						imgresizeth.save(newfileth,dpi=(72,72))
 
