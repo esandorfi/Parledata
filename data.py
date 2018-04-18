@@ -273,15 +273,18 @@ class PlwData(object):
 
 
 		if( '.' in curstatic ):
+			logger.info("1"+curstatic)
 			myStaticfile = self.config.static_path+curstatic
 			myJsonfile = myStaticfile.partition('.')[0]+".json"
 		elif curstatic == '':
 			myStaticfile = self.url[1]
+			logger.info("2"+myStaticfile)
 			if( '.' in myStaticfile ):
 				myJsonfile = myStaticfile.partition('.')[0]+".json"
 			else:
 				myJsonfile = myStaticfile+".json"
 		else:
+			logger.info("3"+curstatic)
 			myStaticfile = self.config.static_path+curstatic + ".html"
 			myJsonfile = self.config.static_path+curstatic + ".json"
 		#logger.info("HTML FILE  "+myStaticfile)

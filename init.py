@@ -154,6 +154,9 @@ class PlwInit(object):
 	#	set variable PWLTEMPLATE static_path
 	#	if changecomplete, apply fullpathname, instead relative from PWLINIT
 	def pushstatic(self, ffolder = '', fchangecomplete = 0):
+
+		#import pdb; pdb.set_trace()
+
 		if self.stopIfError is True and self.noError is False:
 			return False
 		if ffolder == '':
@@ -162,7 +165,10 @@ class PlwInit(object):
 			if( fchangecomplete == 1 ):
 				tmppath = ffolder;
 			else:
-				tmppath = self.static+"\\"+ffolder
+				if( self.static[-1] != '\\' ):
+					tmppath = self.static+"\\"+ffolder
+				else:
+					tmppath = self.static + ffolder
 		#no need ## self.myData.static_url = self.static_url +ffolder+"/"
 		self.myTemplate.set_staticpath(tmppath)
 		self.myData.static_path = self.myTemplate.static_path
