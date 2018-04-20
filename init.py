@@ -52,7 +52,15 @@ class PlwInit(object):
 		self.dtstart = datetime.now()
 
 		# loglevel
-		loglevel(fdebug)
+		#loglevel(fdebug)
+
+		# replace url
+		root = root.replace('\\', '/')
+		fw = fw.replace('\\', '/')
+		st = st.replace('\\', '/')
+		homeurl = homeurl.replace('\\', '/')
+
+
 
 		# init plwtemplate object (jinja)
 		self.myTemplate = PlwTemplate(template, static)

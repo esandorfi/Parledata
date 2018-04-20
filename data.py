@@ -17,7 +17,7 @@ from pprint import pprint
 # parladata package
 from .log import logger
 from .scan import PlwScan
-from .misc import plw_get_url
+from .misc import plw_get_url, StringMetadata
 
 
 # OBJECT PLWDATA
@@ -81,8 +81,10 @@ class PlwData(object):
 		if not os.path.exists(datafile):
 			datafile = self.static_path+fdata
 			if not os.path.exists(datafile):
-				logger.critical("skip json file %s - doesn't exist in %s or in %s " %(datafile, self.source_pathdata, self.static_path))
-				return False
+				datafile = self.idxjson_path+fdata
+				if not os.path.exists(datafile):
+					logger.critical("skip json file %s - doesn't exist in %s or in %s " %(datafile, self.source_pathdata, self.static_path))
+					return False
 		logger.info("load json file "+ datafile)
 		fjson = open(datafile, 'r', encoding='utf-8')
 		try:
@@ -130,7 +132,7 @@ class PlwData(object):
 			if keydata.find('.') == -1:
 				keydata += '.json'
 			logger.info("%s: %s" % (keyname, keydata))
-			if( self.load_json(keyname, self.idxjson_path+keydata) == False ):
+			if( self.load_json(keyname, keydata) == False ):
 				return False
 
 		elif keyname[:6] == 'zenimg':
@@ -168,6 +170,10 @@ class PlwData(object):
 			self.source_pathdata = self.source_path+tmpsourceurl+'\\'
 		datafile = self.source_path+fdata
 
+		if os.path.exists(fdata):
+			datafile = fdata
+			self.source_pathdata = tmpsourceurl
+
 
 		logger.debug("fdata "+fdata)
 		logger.debug("tmpsourceurl "+tmpsourceurl)
@@ -188,7 +194,15 @@ class PlwData(object):
 			return False
 		htmlclass = {'table' : 'table is-hoverable'}
 		#html = markdown2.markdown_path(datafile, extras=["header-ids", "metadata", "toc", "markdown-in-html", "tables"])
-		html = markdown2.markdown_path(datafile, extras={"metadata":None, "toc":None, "markdown-in-html":None, "tables":None, "html-classes":htmlclass})
+		if( datafile.find('.json') != -1 ):
+			#with open(datafile) as json_file:
+			#	json_data = json.load(json_file)
+			html = StringMetadata(" ")
+			#html.metadata = { 'filetype' : 'json', 'json' : json_data }
+			html.metadata = { 'filetype' : 'json', 'zenjson' : datafile }
+			logger.info("filetype is json")
+		else:
+			html = markdown2.markdown_path(datafile, extras={"metadata":None, "toc":None, "markdown-in-html":None, "tables":None, "html-classes":htmlclass})
 		if not html:
 			logger.info("error in markdown file :"+datafile)
 			return False

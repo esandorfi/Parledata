@@ -6,22 +6,25 @@ scan.py
 # IMPORT
 import sys
 import os
-import datetime
+import datetime, time
 import logging
 
 from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoader, TemplateNotFound, TemplateSyntaxError, UndefinedError
 import markdown2
 import json
 import csv
-from pprint import pprint
+#from pprint import pprint
+
+
 
 # parladata package
 from .log import logger
-from .misc import plw_get_url
+from .misc import plw_get_url, PlwWeb, StringMetadata
 
-
+"""
 class StringMetadata(str):
 	metadata = None
+"""
 
 #
 # Generate Index files
@@ -36,8 +39,12 @@ class PlwScan(object):
 
 		# set by scanoption()
 		self.static_path = '' # where html is generated
+		self.screenshot_static_path = '' # where screenshot images are generated
+		self.screenshot_url = '' # where screenshot images are generated as url
+
 		self.static_url = ''  # which server is used to load web pages
 		self.source_path = '' # what is the drive path
+
 
 		# set by activeurl()
 		self.active_url = '' # current url managed by PlwData
@@ -46,11 +53,16 @@ class PlwScan(object):
 		self.extload = {
 			'.md': self.ext_md,
 			'.jpg' : self.ext_img, '.png' : self.ext_img,
-			'.avi' : self.ext_video, '.mp4' : self.ext_video
+			'.avi' : self.ext_video, '.mp4' : self.ext_video,
+			'.htm' : self.ext_html, '.html' : self.ext_html
 		}
 
+		# use web selenium for screenshot
+		self.useweb = 0
+
 	def __del__(self):
-		pass
+		if self.useweb == 1:
+			del self.web
 
 	def openidx(self, name):
 		if( self.routeisopen == True ):
@@ -94,11 +106,25 @@ class PlwScan(object):
 		return True
 
 
-	def scan(self, sourcedir, scanfor = '', scanoption = '@NONE', jsonfile = "idx.json"):
+	def scan(self, sourcedir, scanfor = '', soption = '@NONE', jsonfile = "idx.json"):
 		#if sourcedir[-1:] == '\\':
 		#	sourcedir = sourcedir[:-1]
+		scanoption = soption.lower()
 		logger.info("ZENSCAN source %s for %s (option %s)" %(sourcedir, scanfor, scanoption))
-		isScanOnlyfiles = scanoption.lower().find('@files')
+		isScanOnlyfiles = scanoption.find('@files')
+		isScreenshot = scanoption.find('@screenshot')
+		if( isScreenshot == 0 ):
+			logger.info("ZENSCAN open selenium Firefox.. takes a little time...")
+			try:
+				self.web = PlwWeb()
+				self.useweb = 1
+			except Exception as e:
+				logger.critical("Selenium Firefox can not be set up "+str(e))
+				logger.critical("No screenshot generated")
+				self.useweb = 0
+		#else:
+		#	self.useweb = 0
+
 		try:
 			for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
 				logger.debug("scan find directory : %s", dirpath)
@@ -150,7 +176,7 @@ class PlwScan(object):
 					self.idx = dirpath.split(self.idxroot+'\\')[-1].split('\\')[-1]
 					self.curdirnum = dirnum
 					self.breadcrump.append(self.idx)
-					logger.info("add breadcrump "+self.idx +" len "+str(len(self.breadcrump))+" breadcrump "+'>'.join(self.breadcrump))
+					logger.debug("add breadcrump "+self.idx +" len "+str(len(self.breadcrump))+" breadcrump "+'>'.join(self.breadcrump))
 
 				# add to scan memory the directory
 				if( len(files) > 0 ):
@@ -184,10 +210,16 @@ class PlwScan(object):
 
 
 
-		except ValueError as e:
+		#except ValueError as e:
+		except Exception as e:
 			logger.critical("error walking dir : "+sourcedir+" "+str(e))
+			if( self.useweb ):
+				self.useweb = 0
+				del self.web
 			return ''
 
+		#if( self.useweb ):
+		#	del self.web
 		# make deep to close and open <ul> analyse
 		lastdeep = 1
 		for keyid, data in reversed(sorted(self.toclist.items())):
@@ -215,6 +247,8 @@ class PlwScan(object):
 		if jsonfile.find('.json') == -1:
 			jsonfile += '.json'
 		self.jsondir(jsonfile)
+
+
 		return jsonfile
 
 
@@ -229,6 +263,9 @@ class PlwScan(object):
 		#data = json.dumps(self.toclist, indent=4, sort_keys=True)
 		logger.debug("JSON DUMP")
 		logger.debug(data)
+
+
+
 		#pprint(data)
 		try:
 			myFile = open(fout, "w", encoding='utf-8')
@@ -291,13 +328,31 @@ class PlwScan(object):
 		logger.debug("load image file")
 		html = StringMetadata(fname)
 		html.metadata = { 'filetype' : 'image' }
-		print(html)
 		return html
+
+	def ext_html(self, fname):
+		logger.debug("load html file")
+		html = StringMetadata(fname)
+		html.metadata = { 'filetype' : 'html' }
+		#import pdb; pdb.set_trace()
+		if self.useweb == 1:
+			if( fname.find(self.source_path) != -1 ):
+				logger.debug("screenshot "+fname+" "+self.source_path)
+				fname = fname[len(self.source_path):]
+				logger.debug(" screenshot filename now just is "+fname)
+
+			logger.info("screenshot %s %s %s %s" %(self.static_url, fname, self.screenshot_static_path, self.screenshot_url))
+			screenshot = self.web.screenshot(self.static_url, fname, self.screenshot_static_path, self.screenshot_url)
+			html.metadata['screenshot'] = self.static_url + screenshot
+
+
+		return html
+
 
 	def ext_video(self, fname):
 		logger.debug("load video file")
-		html = {}
-		html.metadata = {}
+		html = StringMetadata(fname)
+		html.metadata = { 'filetype' : 'video' }
 		return html
 
 
@@ -314,24 +369,24 @@ class PlwScan(object):
 				#info['filesize'] = statinfo.st_size
 
 				# select from extension witch function to load
-				loadfunc = self.extload.get(fnamext, lambda fname: False)
-				if( loadfunc == False ):
+				loadfunc = self.extload.get(fnamext, lambda fname: None)
+				html = loadfunc(fname)
+				if not html:
+					logger.critical("do not know what to do with : "+fnamext+" file from scan :"+fname)
 					logger.critical("extension not found in parladata definition, skip as a warning")
 					return True
-				html = loadfunc(fname)
-				logger.debug("load "+fnamext+" file from scan "+ fname)
-				if not html:
-					logger.critical("error in "+fnamext+" file from scan :"+fname)
-					return False
 
+				logger.debug("load "+fnamext+" file from scan "+ fname)
 				url = plw_get_url(fname, self.static_path, self.static_url, self.source_path)
 				logger.info('url %s file %s' %(url[0], url[1]))
 				html.metadata['url'] = url[0]
 				html.metadata['content'] = html
 				#html.metadata['scanfile'] = fname
 				html.metadata['contentsize'] = statinfo.st_size
+				html.metadata['contentdate'] = datetime.datetime.fromtimestamp(statinfo.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+				#time.ctime(statinfo.st_mtime)
 
-				logger.info('active url %s and %s' %(self.active_url, url[0]))
+				logger.debug('active url %s and %s' %(self.active_url, url[0]))
 				if( self.active_url != '' and self.active_url == url[0] ):
 					logger.info('not include file as active url : ' + self.active_url)
 				else:
@@ -346,10 +401,36 @@ class PlwScan(object):
 
 	# SCANOPTION
 	#	set path for plw_get_url
-	def scanoption(self, static_path, static_url, source_path):
-		self.static_path = static_path
-		self.static_url = static_url
-		self.source_path = source_path
+	def scanoption(self, static_path, static_url, source_path, screenshot_static_path='', screenshot_url =''):
+
+		#import pdb; pdb.set_trace()
+
+		if static_path != '':
+			self.static_path = static_path.lower()
+
+		if screenshot_url != '':
+			self.screenshot_url = screenshot_url.lower()
+
+
+		if screenshot_static_path != '':
+			self.screenshot_static_path = screenshot_static_path.lower()
+		else:
+			self.screenshot_static_path = static_path.lower()
+		if( self.screenshot_static_path[-1] != '\\' ):
+			self.screenshot_static_path += '\\'
+
+
+		if static_url != '':
+			self.static_url = static_url.lower()
+		if source_path != '':
+			self.source_path = source_path.lower()
+
+		logger.debug("scan option > static path "+self.static_path)
+		logger.debug("scan option > screenshot static path "+self.screenshot_static_path)
+		logger.debug("scan option > screenshot url "+self.screenshot_url)
+
+		logger.debug("scan option > static url "+self.static_url)
+		logger.debug("scan option > source path "+self.source_path)
 
 	# ACTIVE URL
 	#	set active url (for not include in scan)

@@ -10,7 +10,7 @@ __version__ = "0.4"
 # import sub modules
 from .init import PlwInit, verPackage
 from .log import loginit, loglevel, logger
-from .misc import plw_get_url
+from .misc import plw_get_url, plw_urlify
 from .args import args
 
 from .template import PlwTemplate
