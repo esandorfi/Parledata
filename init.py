@@ -33,11 +33,11 @@ WEBMASTER = 'Parladata from Parle Web'
 
 # return dict values
 def get_v(data, *args):
-    if args and data:
-        element  = args[0]
-        if element:
-            value = data.get(element)
-            return value if len(args) == 1 else get_v(value, *args[1:])
+	if args and data:
+		element  = args[0]
+		if element:
+			value = data.get(element)
+			return value if len(args) == 1 else get_v(value, *args[1:])
 
 
 # OBJECT PlwInit
@@ -60,7 +60,8 @@ class PlwInit(object):
 		self.dtstart = datetime.now()
 		self.stopIfError = True
 		self.noError = True
-        self.isInit = False
+		self.isInit = False
+
 
 
 	def initload(self, config):
@@ -128,15 +129,19 @@ class PlwInit(object):
 		logger.debug("static_idx_path "+static_idx_path +" (known as idxjson_path)")
 		logger.debug("home_url "+home_url)
 		"""
-        # init loaded
-        self.isInit = True
+		# init loaded
+		self.isInit = True
 
 	#def __del__(self):
 	def end(self):
 		#import pdb; pdb.set_trace()
 		dtend = datetime.now()
 		d = dtend - self.dtstart
-		logger.info("%s end in %s seconds" %("OK" if self.noError == True else "---- ERROR", d))
+		logger.info("--- %s end in %s seconds" %("OK" if self.noError == True else "---- ERROR", d))
+		if self.noError == True:
+			logger.info("--- OK, IT IS DONE")
+		else:
+			logger.info("--- ERROR")
 
 
 
@@ -150,7 +155,7 @@ class PlwInit(object):
 	# ROUTE
 	# GENERATE HTML FILE
 	def route(self, fdata, ftemplate, fhtml = ''):
-        if self.isInit == False:
+		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
 
@@ -179,7 +184,7 @@ class PlwInit(object):
 
 	# CHANGE DATA PATH
 	def sourcepath(self, sou = ''):
-        if self.isInit == False:
+		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
 
@@ -196,7 +201,7 @@ class PlwInit(object):
 	#	set variable PWLTEMPLATE static_path
 	#	if changecomplete, apply fullpathname, instead relative from PWLINIT
 	def pushstatic(self, ffolder = '', fchangecomplete = 0):
-        if self.isInit == False:
+		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
 
@@ -219,7 +224,7 @@ class PlwInit(object):
 		self.myData.static_path = self.myTemplate.static_path
 
 	def getstatic(self):
-        if self.isInit == False:
+		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
 
@@ -228,7 +233,7 @@ class PlwInit(object):
 	# PROFILE
 	#	SET SHARED COMMUN INFORMATION FROM A SPECIFIC FILE
 	def profile(self, fdata):
-        if self.isInit == False:
+		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
 
@@ -241,7 +246,7 @@ class PlwInit(object):
 	# ADDIDX
 	#	ADDIDX
 	def addidx(self, idxname, idxpath):
-        if self.isInit == False:
+		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
 

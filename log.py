@@ -22,8 +22,8 @@ def loginit(fdebug = 0, fname = verPackage):
 
 	logging.basicConfig(filename=logname,
 		format='[%(asctime)s] %(filename)s:%(lineno)-4d %(levelname)-6s %(message)s',
-    	datefmt='%d-%m-%Y:%H:%M:%S',
-    	level=flevel)
+		datefmt='%d-%m-%Y:%H:%M:%S',
+		level=flevel)
 
 	#fh = logging.FileHandler(logname)
 

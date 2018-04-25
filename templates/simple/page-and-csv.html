@@ -26,18 +26,18 @@
 				<tr>
 					{% for key, data in dict_item.items() %}
 					 <td>
-						 {% if key == 'img' %}
-						 		{% if zenimg is defined and zenimg[data] is defined %}
-									{# <img src="{{zenimg.folder}}/{{zenimg[data].src}}" width="{{zenimg[data].srcw}}" height="{{zenimg[data].srch}}" /> #}
-									<img src="{{zenimg.folder}}/{{zenimg[data].th}}" width="{{zenimg[data].thw}}" height="{{zenimg[data].thh}}" />
-								{% else %}
-									{{data}}
-								{% endif %}
-
-						 {% else %}
-						 	{{data}}
-						 {% endif %}
-
+						{% if key == 'img' %}
+							{% if zenimg is defined and zenimg[data] is defined %}
+								{# <img src="{{zenimg.folder}}/{{zenimg[data].src}}" width="{{zenimg[data].srcw}}" height="{{zenimg[data].srch}}" /> #}
+								<img src="{{zenimg.folder}}/{{zenimg[data].th}}" width="{{zenimg[data].thw}}" height="{{zenimg[data].thh}}" />
+							{% else %}
+								{{data}}
+							{% endif %}
+						{% elif 'url' in key %}
+							<a href="{{data}}">{{data}}</a>
+						{% else %}
+							{{data}}
+						{% endif %}
 					 </td>
 					{% endfor %}
 				</tr>
