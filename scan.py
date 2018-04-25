@@ -401,9 +401,21 @@ class PlwScan(object):
 
 	# SCANOPTION
 	#	set path for plw_get_url
-	def scanoption(self, static_path, static_url, source_path, screenshot_static_path='', screenshot_url =''):
+	def scanoption(self, static_path, static_url, source_path, screenshot_static_path='', screenshot_url ='', static_idx_path = ''):
+
+		logger.debug("scanoption")
+		logger.debug("static_path "+static_path)
+		logger.debug("static_url "+static_url)
+		logger.debug("source_path "+source_path)
+		logger.debug("screenshot_static_path "+screenshot_static_path)
+		logger.debug("screenshot_url "+screenshot_static_path)
+		logger.debug("static_idx_path "+static_idx_path)
+
 
 		#import pdb; pdb.set_trace()
+
+		if static_idx_path != '':
+			self.static_idx_path = static_idx_path
 
 		if static_path != '':
 			self.static_path = static_path.lower()
@@ -425,12 +437,33 @@ class PlwScan(object):
 		if source_path != '':
 			self.source_path = source_path.lower()
 
-		logger.debug("scan option > static path "+self.static_path)
-		logger.debug("scan option > screenshot static path "+self.screenshot_static_path)
-		logger.debug("scan option > screenshot url "+self.screenshot_url)
+		logger.debug("scanoption")
+		logger.debug("static_path "+self.static_path)
+		logger.debug("static_url "+self.static_url)
+		logger.debug("source_path "+self.source_path)
+		logger.debug("screenshot_static_path "+self.screenshot_static_path)
+		logger.debug("screenshot_url "+self.screenshot_url)
+		logger.debug("static_idx_path "+self.static_idx_path)
 
-		logger.debug("scan option > static url "+self.static_url)
-		logger.debug("scan option > source path "+self.source_path)
+	# INITLOAD
+	#	loadconfig
+	def initload(self, config):
+		self.static_idx_path = config['scan']['static_idx_path']
+		self.static_path = config['scan']['static_path'].lower()
+		self.screenshot_url = config['scan']['screenshot_url'].lower()
+		self.screenshot_static_path = config['scan']['screenshot_static_path'].lower()
+		if( self.screenshot_static_path[-1] != '\\' ):
+			self.screenshot_static_path += '\\'
+		self.static_url = config['scan']['static_url'].lower()
+		self.source_path = config['scan']['source_path'].lower()
+
+		logger.debug("scanoption")
+		logger.debug("static_path "+self.static_path)
+		logger.debug("static_url "+self.static_url)
+		logger.debug("source_path "+self.source_path)
+		logger.debug("screenshot_static_path "+self.screenshot_static_path)
+		logger.debug("screenshot_url "+self.screenshot_url)
+		logger.debug("static_idx_path "+self.static_idx_path)
 
 	# ACTIVE URL
 	#	set active url (for not include in scan)
