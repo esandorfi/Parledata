@@ -1,0 +1,66 @@
+{# JINJA
+	 - for display : main navigation | menu
+#}
+
+{% if zen is defined %}
+{% include 'ui/headz.html' %}
+{% include 'ui/headzen.html' %}
+{% endif %}
+
+<style>
+.navbar-mobileandesktop { width: 100%; display: inline-flex; flex-grow: 1; justify-content: space-between; }
+.navbar-brand { font-size: 1.1rem;
+	align-items: center; justify-content: flex-start;
+	padding-left: .5rem; padding-right: .5rem;
+	display: flex; flex-grow: 2; }
+@media (max-width: 500px) { .navbar-brand { border: 3px solid blue; flex-direction: column; } }
+.navbar-brand-logo { xmargin-top: 5px; margin-right: 1rem; line-height: 0.5rem;}
+.navbar-brand-logo img { height: 30px; }
+.navbar-shadow { opacity: 1; transform: scaleY(1); background-image: linear-gradient(rgba(0,0,0,0.1), transparent); height: 8px; transform-origin: center top;
+	position: absolute; top: 100%; left: 0; right: 0; }
+.navbar-burger { border: 1px solud red; }
+</style>
+<nav class="navbar xis-fixed" role="navigation" aria-label="main navigation">
+		<div class="navbar-shadow"></div>
+		<div class="container">
+			<div class="navbar-mobileandesktop">
+				<div class="navbar-brand">
+					<div class="navbar-brand-logo">
+						<img src="{{profile.rooturl}}{{profile.sourceurl}}{{profile.brandimage}}" alt="{{profile.brand}}" />
+					</div>
+					<div class="navbar-brand-slogan">{{profile.brandslogan|safe}}</div>
+				</div>
+				<div class="navbar-burger" data-target="navMenu">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</div>
+			<div class="navbar-menu" id="navMenu">
+				<div class="navbar-end">
+					<div class="navbar-item has-dropdown is-hoverable">
+						<a class="navbar-link">{{profile.menu1|safe}}</a>
+						<div class="navbar-dropdown is-right">
+								{% include 'ui/zencsv.html' %}
+						</div>
+					</div>
+					<div class="navbar-item has-dropdown is-hoverable">
+				  	<a class="navbar-link">{{profile.menunewsletter|safe}}</a>
+					  <div class="navbar-dropdown is-right" style="width:325px;">
+				    		{% include 'ui/form-newsletter.html' %}
+				  	</div>
+					</div>
+					<div class="navbar-item">
+						<a href="{{homeurl}}" style="color: #000;">
+							<i class="fas fa-home"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+</nav>
+
+{% if zen is defined %}
+{% include 'ui/footz.html' %}
+{% include 'ui/footzen.html' %}
+{% endif %}

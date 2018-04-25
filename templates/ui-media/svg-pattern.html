@@ -1,0 +1,74 @@
+{# JINJA
+	 - for display : svg test
+#}
+
+{% if zen is defined %}
+{% include 'ui/headz.html' %}
+{% endif %}
+
+<style>
+svg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+}
+
+body {
+  background-color: blue;
+  color: #FFF;
+background: rgb(0,0,128); /* Old browsers */
+/* IE9 SVG, needs conditional override of 'filter' to 'none' */
+background: -moz-linear-gradient(top,  rgba(0,0,128,1) 0%, rgba(0,0,128,1) 49%, rgba(0,0,255,1) 50%, rgba(0,0,255,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,128,1)), color-stop(49%,rgba(0,0,128,1)), color-stop(50%,rgba(0,0,255,1)), color-stop(100%,rgba(0,0,255,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  rgba(0,0,128,1) 0%,rgba(0,0,128,1) 49%,rgba(0,0,255,1) 50%,rgba(0,0,255,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  rgba(0,0,128,1) 0%,rgba(0,0,128,1) 49%,rgba(0,0,255,1) 50%,rgba(0,0,255,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  rgba(0,0,128,1) 0%,rgba(0,0,128,1) 49%,rgba(0,0,255,1) 50%,rgba(0,0,255,1) 100%); /* IE10+ */
+background: linear-gradient(to bottom,  rgba(0,0,128,1) 0%,rgba(0,0,128,1) 49%,rgba(0,0,255,1) 50%,rgba(0,0,255,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000080', endColorstr='#0000ff',GradientType=0 ); /* IE6-8 */
+
+}
+</style>
+
+{% if zen is defined %}
+{% include 'ui/headzen.html' %}
+{% endif %}
+
+<div style="height: 100px;">START {{pagetitle}}</div>
+
+<div class="container">
+
+<div class="columns" style="height: 600px; width: 100%; background-color: #fff;">
+  <div class="column">
+    {{content|safe}}
+  </div>
+  <div class="column is-hidden-mobile">
+
+    <svg version="1.1" id="primary-image" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 80.38 100" preserveAspectRatio="xMinYMax slice">
+      <defs>
+        <pattern id="image" patternUnits="userSpaceOnUse" width="83.38" height="100" x="0" y="0">
+          <image xlink:href="{{profile.rooturl}}{{sourceurl}}{{imagecover}}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMinYMin slice"/>
+        </pattern>
+        <path id="shape" d="M80.4,0c0,33.3,0,66.7,0,100c-26.8,0-53.6,0-80.4,0c0,0,0-0.1,0-0.1 c3.3-12.3,6.5-24.6,9.8-37c0.9-21,1.9-41.9,2.8-62.9C35.2,0,57.8,0,80.4,0z" />
+        <line id="line" x1="0" y1="0" x2="83.3" y2="100" stroke="#0F0" fill="#0F0" style="stroke:rgb(255,0,0)">
+      </defs>
+      <use xlink:href="#shape" fill="black"></use>
+      <use xlink:href="#shape" fill="url(#image)"></use>
+    </svg>
+
+  </div>
+  <div class="column is-hidden-tablet" style="background: url({{profile.rooturl}}{{sourceurl}}{{imagecover}}); height: 500px;">
+
+
+  </div>
+</div>
+
+</div>
+
+<div style="height: 100px;">END {{pagetitle}}</div>
+
+{% if zen is defined %}
+{% include 'ui/footz.html' %}
+{% include 'ui/footzen.html' %}
+{% endif %}

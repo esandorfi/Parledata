@@ -1,0 +1,68 @@
+{
+    "app": "Tableau de bord",
+    "appdescription": "Tableau de bord - Pr\u00e9-\u00e9tude de site et de besoins m\u00e9tiers - Avril 2018",
+    "adradresse": "3 bld des lices<br>13200 Arles, FR",
+    "adrtel": "06 63 96 39 10",
+    "adrcourriel": "contact@cie-autrementdit.com",
+    "brand": "La compagnie Nathalie Pinot<br>Ass. Autrement dit",
+    "zencsv": [
+        {
+            "title": "abonn\u00e9s",
+            "url": "/abonn\u00e9s",
+            "icon": "<i class=\"far fa-address-book\"></i>"
+        },
+        {
+            "title": "vitrine",
+            "url": "/vitrine",
+            "icon": "<i class=\"far fa-file-code\"></i>"
+        },
+        {
+            "title": "calendrier",
+            "url": "/calendrier",
+            "icon": "<i class=\"far fa-clock\"></i>"
+        }
+    ],
+    "content": "<h1 id=\"profile\">Profile</h1>\n",
+    "rooturl": "http://git.l/py-compagnie/",
+    "fwurl": "http://git.l/py-compagnie/assets/",
+    "homeurl": "http://git.l/py-compagnie/local/",
+    "sourcedata": "py-compagnie",
+    "sourceurl": "data/profile/",
+    "staticurl": "http://git.l/py-compagnie/local/static/",
+    "url": "http://git.l/py-compagnie/local/static/profile/profile.html",
+    "webmaster": "Emmanuel Sandorfi - Recherche et d\u00e9veloppement python",
+    "profile": {
+        "app": "Tableau de bord",
+        "appdescription": "Tableau de bord - Pr\u00e9-\u00e9tude de site et de besoins m\u00e9tiers - Avril 2018",
+        "adradresse": "3 bld des lices<br>13200 Arles, FR",
+        "adrtel": "06 63 96 39 10",
+        "adrcourriel": "contact@cie-autrementdit.com",
+        "brand": "La compagnie Nathalie Pinot<br>Ass. Autrement dit",
+        "zencsv": [
+            {
+                "title": "abonn\u00e9s",
+                "url": "/abonn\u00e9s",
+                "icon": "<i class=\"far fa-address-book\"></i>"
+            },
+            {
+                "title": "vitrine",
+                "url": "/vitrine",
+                "icon": "<i class=\"far fa-file-code\"></i>"
+            },
+            {
+                "title": "calendrier",
+                "url": "/calendrier",
+                "icon": "<i class=\"far fa-clock\"></i>"
+            }
+        ],
+        "content": "<h1 id=\"profile\">Profile</h1>\n",
+        "rooturl": "http://git.l/py-compagnie/",
+        "fwurl": "http://git.l/py-compagnie/assets/",
+        "homeurl": "http://git.l/py-compagnie/local/",
+        "sourcedata": "py-compagnie",
+        "sourceurl": "data/profile/",
+        "staticurl": "http://git.l/py-compagnie/local/static/",
+        "url": "http://git.l/py-compagnie/local/static/profile/profile.html",
+        "webmaster": "Emmanuel Sandorfi - Recherche et d\u00e9veloppement python"
+    }
+}

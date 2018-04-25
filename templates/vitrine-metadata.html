@@ -1,0 +1,38 @@
+<style>
+	.table { padding: 1rem; margin: 1rem; }
+	.table .empty { height: 2rem; }
+	.table .emptydouble { height: 5rem; }
+	.table .width1 { width: 10rem; }
+	.table th { text-align: left; }
+</style>
+<table class="table metadata">
+	<tr><th class="width1">pagetitle</th><td>{{pagetitle}}</td></tr>
+		<tr><td>pagedescription</td><td>{{pagedescription}}</td></tr>
+	<tr><td colspan=2 class="empty"></td></tr>
+		<tr><th>sectiontitle</th><td>{{sectiontitle}}</td></tr>
+			<tr><td>sectiondescription</td><td>{{sectiondescription|safe}}</td></tr>
+	<tr><td colspan=2 class="empty"></td></tr>
+		<tr><th>section2title</th><td>{{section2title}}</td></tr>
+			<tr><td>section2tab</td><td>{{section2tab}}</td></tr>
+			<tr><td>section2tab2</td><td>{{section2tab2}}</td></tr>
+			<tr><td>section2tab3</td><td>{{section2tab3}}</td></tr>
+	<tr><td colspan=2 class="empty"></td></tr>
+		<tr><th>content</th><td>{{content|safe}}</td></tr>
+	<tr><td colspan=2 class="emptydouble"></td></tr>
+		<tr><th>actionlettretitle</th><td>{{actionlettretitle}}</td></tr>
+			<tr><td>actionlettredescription</td><td>{{actionlettredescription}}</td></tr>
+	<tr><td colspan=2 class="empty"></td></tr>
+		<tr><th>actioncontacttitle</th><td>{{actioncontacttitle}}</td></tr>
+			<tr><td>actioncontactbrand</td><td>{{actioncontactbrand}}</td></tr>
+			<tr><td>actioncontactadresse</td><td>{{actioncontactadresse}}</td></tr>
+			<tr><td>actioncontacttel</td><td>{{actioncontacttel}}</td></tr>
+			<tr><td>actioncontactcourriel</td><td>{{actioncontactcourriel}}</td></tr>
+			<tr><td>actioncontactinstagram</td><td>{{actioncontactinstagram}}</td></tr>
+	<tr><td colspan=2 class="empty"></td></tr>
+		<tr><th>brand</th><td>{{brand}}</td></tr>
+			<tr><td>brandimage</td><td>{{brandimage}}</td></tr>
+			<tr><td>brandimage</td><td><img src="{{rooturl}}{{sourceurl}}{{brandimage}}" alt="{{brandimage}}"></td></tr>
+	<tr><td colspan=2 class="empty"></td></tr>
+		<tr><th>menucontact</th><td>{{menucontact}}</td></tr>
+			<tr><td>menucontacturl</td><td>{{menucontacturl}}</td></tr>
+</table>

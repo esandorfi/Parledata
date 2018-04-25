@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{pagetitle}}</title>
+	<meta name="description" content="{{pagedescription}}">
+
+	<link rel="stylesheet" href="{{fwurl}}bulma/0.6.2/bulma.min.css">
+
+	<meta name="author" content="{{webmaster}}" />
+	<meta name="language" content="fr">
+	<meta name="rating" content="Safe For Kids" />
+	<meta name="revisit-after" content="3 Day" />
+	<meta name="robots" content="index, follow">
+
+
+	<style>
+	.link { color: #ef5122; border-bottom: 1px solid #ef5122; }
+	.link:hover { background-color: #ef5122; color: #fff;  }
+
+/** NAVBAR - HAUT DE PAGE
+*/
+		.navbar { padding-left: 1rem; padding-right: 1rem; padding-top: 0.5rem; }
+		.navbar-brand img {
+			height: 40px;
+		}
+/** ESPACE CENTRAL - VISUEL ET TEXTE
+*/
+		.espacecentral .title { padding-bottom: 1rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+/** ENBASDEPAGE - ADR, NEWSLETTER
+*/
+		.enbasdepage {
+			border-top: 1px solid lightgray;
+			font-size: 0.8rem;
+			line-height: 0.9rem;
+
+		}
+
+		.enbasdepage .level {
+			height: 70px;
+		}
+
+		.enbasdepage-left .level-item {
+			padding-right: 1rem;
+		}
+
+		.enbasdepage-brand img {
+			height: 20px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- MAIN SCREEN -->
+	<div class="hero is-fullheight">
+		<!-- NAVIGATION -->
+		<div class="hero-head">
+			<nav class="navbar" aria-label="main navigation">
+				<div class="container">
+					<div class="navbar-brand">
+						<a href="{{rooturl}}">
+							<img src="{{rooturl}}{{sourceurl}}{{brandimage}}" alt="{{brandimage}}"/>
+						</a>
+					</div>
+				</div>
+			</nav>
+		</div>
+		<!-- CONTENT -->
+		<div class="hero-body espacecentral">
+			<div class="container has-text-centered">
+				<img src="{{rooturl}}{{sourceurl}}{{landingimage}}" alt="{{brandimage}}" /><br />
+				<h1 class="title">{{landing|safe}}</h1>
+				<p class="subtitle">{{landingtxt|safe}}</p>
+			</div>
+		</div>
+		<!-- FOOTER -->
+		<div class="hero-foot enbasdepage">
+			<div class="container">
+				<div class="level">
+					<!-- ADR -->
+					<div class="level-left enbasdepage-left">
+						<div class="level-item enbasdepage-brand">
+							<img src="{{rooturl}}{{sourceurl}}{{brandimage}}" alt="{{brandimage}}" />
+						</div>
+						<div class="level-item">{{actioncontactadresse|safe|upper}}</div>
+						<div class="level-item"><i class="fas fa-mobile"></i>&nbsp;&nbsp;{{actioncontacttel|upper}}</div>
+						<div class="level-item">
+							<a href="mailto:{{actioncontactcourriel}}" class="link"><i class="far fa-envelope"></i> {{actioncontactcourriel|upper}}</a>
+						</div>
+					</div>
+					<!-- LETTRE -->
+					<div class="level-right" xstyle="display: none;">
+						<div class="level-item">
+							<form action="{{rooturl}}{{actionnewsletterpost}}" method="POST" accept-charset="utf-8">
+								<p class="heading">{{actionnewsletter|safe}}</p>
+								<div class="field is-grouped">
+									<div class="control has-icons-left is-expanded">
+										<input type="email" value="" name="email" class="input is-flat required email" placeholder="votre courriel" required>
+										<span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+									</div>
+									<div class="control">
+										<div class="is-hidden">
+											<input type="text" name="hp" id="hp">
+										</div>
+										<input type="hidden" name="list" value="{{sourcedata}}">
+										<button type="submit" name="submit" id="mc-embedded-subscribe" class="button is-primary">
+										<i class="fas fa-check"></i>
+									</button>
+									</div>
+								</div>
+							</form>
+						</div>
+						<!-- END -->
+					</div>
+				</div>
+				<!-- END -->
+			</div>
+		</div>
+	</div>
+	<!-- END -->
+
+	<!-- SCRIPT -->
+	<script defer src="{{fwurl}}fontawesome/5.0.0/all.js"></script>
+	<script src="{{fwurl}}jquery/3.1.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function() {
+
+		});
+	</script>
+
+	<!-- END -->
+</body>
+
+</html>

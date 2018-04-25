@@ -1,0 +1,110 @@
+{#
+IUADMIN-IDX
+Premiers pas vers une interface d'administration pour les rédacteurs
+#}
+{% include 'ui/headz.html' %}
+
+<style>
+
+.iu { display: flex; }
+
+.zenscan { padding-left: 1rem; margin-bottom: 1rem; }
+.zenscan li { padding-left: 1rem; }
+	.deep { background-color: #fff; color: darkgray; padding: .1rem; margin: .1rem; }
+	.deep0 { opacity: 1; }
+	.deep1 { opacity: 0.9; }
+	.deep2 { opacity: 0.8; }
+	.deep3 { opacity: 0.7; }
+	.deep4 { opacity: 0.6; }
+
+
+.data-metadata div { margin: 1rem; padding: 1rem; border: 1px solid #000; }
+.data-markdown h1 { font-size: 2rem; }
+.data-markdown p { margin-top: 0.5rem; }
+
+
+
+</style>
+
+
+{% include 'ui/headzen.html' %}
+
+
+
+<div class="iu">
+
+	{# IU DATA #}
+	<div class="iu-data">
+{#
+		<div class="accordions">
+			<div class="data-seo accordion">
+				<div class="accordion-header">
+		 			<p>SEO - Référencement naturel</p>
+		 			<button class="toggle" aria-label="toggle"></button>
+	 			</div>
+				<div class="accordion-body">
+					<div class="accordion-content">
+						<strong>pagetitle: </strong>{{pagetitle}}<br />
+						<strong>pagedescription: </strong>{{pagedescription}}<br />
+					</div>
+				</div>
+			</div>
+
+			<div class="data-seo accordion">
+				<div class="accordion-header">
+		 			<p>zenscan data</p>
+		 			<button class="toggle" aria-label="toggle"></button>
+	 			</div>
+				<div class="accordion-body">
+					<div class="accordion-content">
+						{{zenscan|safe}}
+					</div>
+				</div>
+			</div>
+#}
+
+		</div>
+
+		<div class="data-markdown">
+			{{content|safe}}
+		</div>
+
+	</div>
+
+
+	{# IU ACTION #}
+	<div class="iu-action">
+			<ul>
+				<li class="action-zenscan">
+					{% if zenscan is defined %}
+						{% for key, value in zenscan.items() %}
+							<strong>VALUE {{key}}</strong><br />
+
+							{% if value['scanlen'] > 0 %}
+								{% for scankey, scanvalue in value['scan'].items() %}
+									<a href="{{scanvalue['url']}}">{{scankey}} {{scanvalue['pagetitle']}}</a><br />
+									{{scanvalue['pagedescription']|safe}}
+								{% endfor %}
+							{% endif %}
+							<hr />
+						{% endfor %}
+					{% endif %}
+				</li>
+				<li class="action-publicview">
+					vue publique
+				</li>
+				<li class="action-print">
+					imprimer
+				</li>
+				<li class="action-profile">
+					profile
+				</li>
+			</ul>
+	</div>
+	{# END IU ACTION #}
+
+</div>
+
+
+{% include 'ui/footz.html' %}
+{% include 'ui/footzen.html' %}

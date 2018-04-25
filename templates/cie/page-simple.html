@@ -1,0 +1,63 @@
+{% include 'ui/headz.html' %}
+<style>
+		.espacecentral { margin-top: 1rem; margin-bottom: 5rem; }
+		.espacecentral h1 { font-size: 2rem; padding-bottom: 1rem; padding-top: 2rem; }
+		.espacecentral h2 { font-size: 1.5rem; padding-bottom: .5rem; padding-top: 2rem; }
+		.espacecentral ul { list-style-type: square; margin-left: 1.5rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+		.has-text-left { text-align: left; }
+		.appzencsv { padding-top: 2rem; }
+</style>
+{% include 'ui/headzen.html' %}
+
+
+
+{% include 'ui/nav-profile-zencsv.html' %}
+{% include 'ui/head-app.html' %}
+
+{% if zencsv is defined %}
+<section class="appzencsv">
+	<div class="container">
+		<table class="table is-hoverable is-fullwidth zencsv">
+			<thead>
+				<tr>
+
+						{% for dict in zencsv | first %}
+					 	<td>
+						 	{{dict}}
+					 	</td>
+						{% endfor %}
+
+				</tr>
+			</thead>
+			<tbody>
+			{% for dict_item in zencsv %}
+				<tr>
+					{% for key, data in dict_item.items() %}
+					 <td>
+						 {{data}}
+					 </td>
+					{% endfor %}
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% endif %}
+
+<section class="espacecentral">
+	<div class="container">
+		{{content|safe}}
+	</div>
+</section>
+
+
+{% include 'ui/foot-app.html' %}
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+{% include 'ui/footzen.html' %}

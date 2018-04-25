@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{pagetitle}}</title>
+	<meta name="description" content="{{pagedescription}}">
+
+	<link rel="stylesheet" href="{{fwurl}}bulma/0.6.2/bulma.min.css">
+
+	<meta name="author" content="{{webmaster}}" />
+	<meta name="language" content="fr">
+	<meta name="rating" content="Safe For Kids" />
+	<meta name="revisit-after" content="3 Day" />
+	<meta name="robots" content="index, follow">
+
+</head>
+
+<body>
+	<!-- LETTRE -->
+		<div class="container">
+				<div class="level">
+					<div class="level-left" style="border: 10px solid red">
+						<div class="level-item"><div id="ui-newsletter" style="width: 100%; display: none;"></div>
+							<!-- FORM LETTRE -->
+							<form action="{{rooturl}}{{actionnewsletterpost}}" method="POST" accept-charset="utf-8" id="form-newsletter">
+
+
+								<p class="heading">{{actionnewsletter|safe}}</p>
+								<div class="field is-grouped">
+									<div class="control has-icons-left is-expanded">
+										<input type="email" value="" name="email" class="input is-flat required email" placeholder="votre courriel" required id="form-newsletter-courriel">
+										<span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+									</div>
+									<div class="control">
+										<input type="hidden" name="list" value="{{sourcedata}}">
+										<button type="submit" name="submit-newsletter" id="submit-newsletter" class="button is-primary">
+										<i class="fas fa-check"></i>
+									</button>
+									</div>
+								</div>
+							</form>
+							<!-- END -->
+						</div>
+					</div>
+			 </div>
+		</div>
+	<!-- END -->
+
+	<!-- SCRIPT -->
+	<script defer src="{{fwurl}}fontawesome/5.0.0/all.js"></script>
+	<script src="{{fwurl}}jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function() {
+
+				console.log('ready');
+        $('#form-newsletter').bind('submit', function (event) {
+					console.log('submit');
+					event.preventDefault();
+          $.ajax({
+            type: 'POST',
+            url: '{{rooturl}}{{actionnewsletterpost}}',
+            data: $('#form-newsletter').serialize(),
+						beforeSend: function() {
+							console.log('before');
+		          $('#submit-newsletter').attr('disabled', true);
+		        },
+						complete: function() {
+							console.log('complete');
+	            $('#submit-newsletter').attr('disabled', false);
+	          },
+            success: function (data) {
+							console.log('success');
+							$('#form-newsletter').hide();
+							$('#ui-newsletter').hide().html(data).slideDown();
+            }
+          });
+				});
+
+				$('#ui-newsletter').bind('click', function(event) {
+					  console.log('delete');
+				    $(this).hide();
+				    $('#form-newsletter').show();
+				});
+
+});
+</script>
+ok
+
+
+
+	<!-- END -->
+</body>
+
+</html>

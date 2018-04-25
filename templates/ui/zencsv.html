@@ -1,0 +1,28 @@
+<style>
+.zencsv { width: 300px; }
+.zencsv-link { display: inline-block; width: 100%; font-size: 1.1rem;}
+.zencsv-link { color: #ef5122; xborder-bottom: 1px solid #ef5122; text-decoration: none !important; }
+.zencsv-link:hover { opacity: 0.8; }
+</style>
+{% if profile.zencsvmenu1 is not defined %}
+NO ZENCSVMENU1 IN PROFILE
+{% else %}
+	<table class="table zencsv">
+	{% for dict_item in profile.zencsvmenu1 %}
+		<tr>
+	{#
+	   <td>
+		 {{dict_item['cat']}}
+		 </td>
+	 #}
+		 <td>
+			 <a href="{{profile.staticurl}}{{dict_item['url']}}" class="zencsv-link">
+			 <strong>{{dict_item['title']}}</strong></a>
+			 {% if dict_item['info'] %}
+			 <br /><span>{{dict_item['info']}}</span>
+			 {% endif %}
+		 </td>
+		</tr>
+	{% endfor %}
+	</table>
+{% endif %}

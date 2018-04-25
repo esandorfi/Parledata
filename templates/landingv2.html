@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{pagetitle}}</title>
+	<meta name="description" content="{{pagedescription}}">
+
+	<link rel="stylesheet" href="{{profile.fwurl}}bulma/0.6.2/bulma.min.css">
+
+	<meta name="author" content="{{profile.webmaster}}" />
+	<meta name="language" content="fr">
+	<meta name="rating" content="Safe For Kids" />
+	<meta name="revisit-after" content="3 Day" />
+	<meta name="robots" content="index, follow">
+
+
+	<style>
+	.link { color: #ef5122; border-bottom: 1px solid #ef5122; }
+	.link:hover { background-color: #ef5122; color: #fff;  }
+
+/** NAVBAR - HAUT DE PAGE
+*/
+
+		.navbar-brand img {
+			height: 40px;
+		}
+/** ESPACE CENTRAL - VISUEL ET TEXTE
+*/
+		.espacecentral .title { padding-bottom: 1rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+/** ENBASDEPAGE - ADR, NEWSLETTER
+*/
+		.enbasdepage {
+			border-top: 1px solid lightgray;
+			font-size: 0.8rem;
+			line-height: 0.9rem;
+
+		}
+
+		.enbasdepage .level {
+			height: 70px;
+		}
+
+		.enbasdepage-left .level-item {
+			padding-right: 1rem;
+		}
+
+		.enbasdepage-brand img {
+			height: 20px;
+		}
+	</style>
+</head>
+
+<body>
+	{% include 'ui/navigation.html' %}
+	<!-- MAIN SCREEN -->
+	<div class="hero is-fullheight">
+		<!-- NAVIGATION -->
+		<div class="hero-head">
+			<nav class="navbar" aria-label="main navigation">
+				<div class="container">
+					<div class="navbar-brand">
+
+					</div>
+					<div class="navbar-menu">
+						<div class="navbar-end">
+
+
+							<div class="navbar-item has-dropdown is-hoverable">
+								<a class="navbar-link">découvrir&nbsp;<strong>parle web</strong></a>
+								<div class="navbar-dropdown is-right is-expanded">
+										% include 'ui-menu-table.html' %
+								</div>
+							</div>
+							<div class="navbar-item has-dropdown is-hoverable">
+						  	<a class="navbar-link">newsletter</a>
+							  <div class="navbar-dropdown is-right" style="width:325px;">
+						    		{% include 'ui-form-newsletter.html' %}
+						  	</div>
+							</div>
+							<div class="navbar-item">
+								<a href="{{profile.rooturl}}" style="color: #000;">
+									<i class="fas fa-home"></i>
+								</a>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</nav>
+		</div>
+		<!-- CONTENT -->
+		<div class="hero-body espacecentral">
+			<div class="container has-text-centered">
+				<img src="{{profile.rooturl}}{{sourceurl}}{{landingimage}}" alt="{{pagetitle}}" /><br />
+				<h1 class="title">{{landing|safe}}</h1>
+				<p class="subtitle">{{landingtxt|safe}}</p>
+
+
+			</div>
+		</div>
+		<!-- FOOTER -->
+		<div class="hero-foot enbasdepage">
+			<div class="container">
+				<div class="level">
+					<!-- ADR -->
+					<div class="level-left enbasdepage-left">
+						<div class="level-item enbasdepage-brand">
+							<img src="{{profile.rooturl}}{{profile.sourceurl}}{{profile.brandimage}}" alt="{{profile.brand}}" />
+						</div>
+						<div class="level-item">{{profile.adradresse|safe|upper}}</div>
+						<div class="level-item"><i class="fas fa-mobile"></i>&nbsp;&nbsp;{{profile.adrtel|upper}}</div>
+						<div class="level-item">
+							<a href="mailto:{{profile.adrcourriel}}" class="link"><i class="far fa-envelope"></i> {{profile.adrcourriel|upper}}</a>
+						</div>
+					</div>
+					<!-- LETTRE -->
+					<div class="level-right">
+						{% if profile.reseaulinkedin is defined %}
+						<div class="level-item">
+							<a href="{{profile.reseaulinkedin}}" target=_new><i class="fab fa-linkedin"></i></a>
+						</div>
+						{% endif %}
+						<!-- END -->
+					</div>
+				</div>
+				<!-- END -->
+			</div>
+		</div>
+	</div>
+	<!-- END -->
+
+<div style="position: absolute; bottom: 10rem; right: 10rem;">
+	<a href=# class="button" id="btnFullscreen" type="button">
+		plein écran</a>
+		<img src="{{profile.rooturl}}{{sourceurl}}{{profile.brandimage}}" id="imgFS"/>
+</div>
+
+
+	<!-- SCRIPT -->
+	<script defer src="{{profile.fwurl}}fontawesome/5.0.0/all.js"></script>
+	<script src="{{profile.fwurl}}jquery/3.1.1/jquery.min.js"></script>
+	<script src="{{profile.staticurl}}parladata.js"></script>
+	<!-- END -->
+<script>
+
+
+function toggleFullscreen(elem) {
+  elem = elem || document.documentElement;
+  if (!document.fullscreenElement && !document.mozFullScreenElement &&
+    !document.webkitFullscreenElement && !document.msFullscreenElement) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    } else if (elem.mozRequestFullScreen) {
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+}
+
+document.getElementById('btnFullscreen').addEventListener('click', function() {
+  toggleFullscreen();
+});
+document.getElementById('imgFS').addEventListener('click', function() {
+  toggleFullscreen(this);
+});
+
+
+
+
+
+
+
+
+
+
+[].forEach.call(document.querySelectorAll("*"),function(a){a.style.outline="1px solid #"+(~~(Math.random()*(1<<24))).toString(16)});
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+
+{% if data is not defined %}
+NO DATA
+{% else %}
+	{{data}}
+	{% set checkcategory = '1' %}
+	<table class="table">
+	{% for dict_item in data %}
+
+		<tr>
+			<td>
+				{{ key }}
+			</td>
+			<td>cat;title;info;url
+				{{ value["cat"]}} - value["title"]}} - value["info"]}}
+				<br />
+				value["url"]}}
+			</td>
+		</tr>
+	{% endfor %}
+</table>
+{% endif %}

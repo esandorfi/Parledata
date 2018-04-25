@@ -1,0 +1,21 @@
+<style>
+.ui-form { padding: 0.5rem; }
+.ui-form .heading { font-size: 0.9rem; line-height: 1rem; }
+</style>
+
+<div class="ui-form"><!-- FORM POST AJAX NEWSLETTER -->
+<div id="ui-newsletter" style="width: 100%; display: none;"></div>
+	<form action="{{profile.rooturl}}{{profile.postnewsletter}}" method="POST" accept-charset="utf-8" id="form-newsletter">
+		<p class="heading">{{profile.titlenewsletter|safe}}</p>
+		<div class="field is-grouped">
+			<div class="control has-icons-left is-expanded">
+					<input type="email" value="" name="email" class="input is-flat required email" placeholder="votre courriel" required id="form-newsletter-courriel">
+					<span class="icon is-small is-left"><i class="fas fa-envelope"></i></span>
+			</div>
+			<div class="control">
+					<input type="hidden" name="list" value="{{profile.sourcedata}}">
+					<button type="submit" name="submit-newsletter" id="submit-newsletter" class="button is-primary"><i class="fas fa-check"></i></button>
+			</div>
+		</div>
+	</form>
+</div><!--END-->

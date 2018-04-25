@@ -1,0 +1,29 @@
+{% include 'ui/headz.html' %}
+<style>
+		.espacecentral { margin-top: 1rem; margin-bottom: 5rem; padding-left: 2rem; }
+		.espacecentral h1 { font-size: 1.5rem; padding-bottom: 1rem; padding-top: 2rem; }
+		.espacecentral h2 { font-size: 1.3rem; padding-bottom: .5rem; padding-top: 2rem; font-weight: normal; }
+		.espacecentral ul { list-style-type: square; margin-left: 1.5rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+		.has-text-left { text-align: left; }
+		.appzencsv { padding-top: 2rem; }
+
+		.header { border-bottom: 2px solid black; padding: 2rem; font-size: 1.5rem; width: 20cm;}
+</style>
+{% include 'ui/headzen.html' %}
+
+<div class="header">
+	{{pagetitle}}
+</div>
+
+<section class="espacecentral">
+	{{content|safe}}
+</section>
+
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+{% include 'ui/footzen.html' %}

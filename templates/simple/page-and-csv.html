@@ -1,0 +1,49 @@
+{% extends "simple/page.html" %}
+
+{% block css %}
+.size-a4 .content .appzencsv { position: absolute; top: 5cm; width: 100%; }
+.appzencsv { border: 1px solid black; padding: .5rem;  }
+
+{% endblock %}
+
+{% block content %}
+{% if zencsv is defined %}
+<div class="appzencsv">
+		<table class="table is-hoverable is-fullwidth zencsv">
+			<thead>
+				<tr>
+
+						{% for dict in zencsv | first %}
+					 	<td>
+						 	{{dict}}
+					 	</td>
+						{% endfor %}
+
+				</tr>
+			</thead>
+			<tbody>
+			{% for dict_item in zencsv %}
+				<tr>
+					{% for key, data in dict_item.items() %}
+					 <td>
+						 {% if key == 'img' %}
+						 		{% if zenimg is defined and zenimg[data] is defined %}
+									{# <img src="{{zenimg.folder}}/{{zenimg[data].src}}" width="{{zenimg[data].srcw}}" height="{{zenimg[data].srch}}" /> #}
+									<img src="{{zenimg.folder}}/{{zenimg[data].th}}" width="{{zenimg[data].thw}}" height="{{zenimg[data].thh}}" />
+								{% else %}
+									{{data}}
+								{% endif %}
+
+						 {% else %}
+						 	{{data}}
+						 {% endif %}
+
+					 </td>
+					{% endfor %}
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+</div>
+{% endif %}
+{% endblock %}

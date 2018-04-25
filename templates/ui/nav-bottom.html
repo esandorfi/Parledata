@@ -1,0 +1,56 @@
+{# JINJA
+	- for display : adresse | social
+#}
+{% if zen is defined %}
+{% include 'ui/headz.html' %}
+{% include 'ui/headzen.html' %}
+{% endif %}
+
+<style>
+	.link { color: #ef5122; xborder-bottom: 1px solid #ef5122; text-decoration: none !important; }
+	.link:hover { background-color: #ef5122; color: #fff;  }
+	.enbasdepage {
+				border-top: 1px solid lightgray;
+				font-size: 0.9rem;
+				line-height: 0.9rem;
+				background-color: #fafafa;
+			}
+			.enbasdepage .level {
+				height: 70px;
+			}
+			.enbasdepage-left .level-item {
+				padding-right: 1rem;
+			}
+			.enbasdepage-brand img {
+				height: 20px;
+			}
+			.enbasdepage-right { font-size: 1.2rem; }
+</style>
+<div class="enbasdepage">
+	<div class="container">
+	<div class="level">
+		<div class="level-left enbasdepage-left">
+			<div class="level-item enbasdepage-brand">
+				<img src="{{profile.rooturl}}{{profile.sourceurl}}{{profile.brandimage}}" alt="{{profile.brand}}" />
+			</div>
+			<div class="level-item">{{profile.adradresse|safe|upper}}</div>
+			<div class="level-item"><i class="fas fa-mobile"></i>&nbsp;&nbsp;{{profile.adrtel|upper}}</div>
+			<div class="level-item">
+				<a href="mailto:{{profile.adrcourriel}}" class="link"><i class="far fa-envelope"></i> {{profile.adrcourriel|upper}}</a>
+			</div>
+		</div>
+		<div class="level-right enbasdepage-right">
+			{% if profile.reseaulinkedin is defined %}
+			<div class="level-item">
+				<a href="{{profile.reseaulinkedin}}" target=_new><i class="fab fa-linkedin"></i></a>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+	</div>
+</div>
+
+{% if zen is defined %}
+{% include 'ui/footz.html' %}
+{% include 'ui/footzen.html' %}
+{% endif %}

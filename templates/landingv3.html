@@ -1,0 +1,49 @@
+{% include 'ui/headz.html' %}
+<style>
+		.espacecentral { border: 3px solid red; margin-top: 20px; margin-bottom: 20px; }
+		.espacecentral .title { padding-bottom: 1rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+		.has-text-left { text-align: left; }
+</style>
+{% include 'ui/headzen.html' %}
+
+
+
+{% include 'ui/nav-top.html' %}
+
+{# MAIN SCREEN #}
+
+		<div class="espacecentral">
+			<div class="container has-text-centered">
+				<div class="columns">
+					<div class="column">
+						<img src="{{profile.rooturl}}{{sourceurl}}{{landingimage}}" alt="{{pagetitle}}" /><br />
+					</div>
+					<div class="column has-text-left">
+						<h1 class="title">{{landing|safe}}</h1>
+						<p class="subtitle">{{landingtxt|safe}}</p>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+
+{# SEPARATOR #}
+
+		<div class="hero is-medium">
+			<div class="container">			
+				{% include 'ui/zencsvfromcontent.html' %}
+			</div>
+		</div>
+
+{% include 'ui/nav-bottom.html' %}
+
+
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+{% include 'ui/footzen.html' %}

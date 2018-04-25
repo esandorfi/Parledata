@@ -1,0 +1,28 @@
+{#
+  hero-pagetitle v1
+  use variables : profile.appdescription, pagetitle, pagedescription
+#}
+<style>
+.appdescription { color: #fafafa; }
+</style>
+<section class="hero">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        {% if pagetitle is defined %}
+          {{pagetitle}}
+        {% else %}
+          {{url}}<br />
+          hum? better to define pagetitle: in document
+        {% endif %}
+      </h1>
+      <p class="subtitle">
+        {% if pagedescription is defined %}
+          {{pagedescription}}
+        {% else %}
+          {{profile.appdescription|safe}}
+        {% endif %}
+      </p>
+    </div>
+  </div>
+</section>

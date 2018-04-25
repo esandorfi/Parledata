@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{pagetitle}}</title>
+	<meta name="description" content="{{pagedescription}}">
+
+	<link rel="stylesheet" href="{{fwurl}}bulma/0.6.2/bulma.min.css">
+	<link rel="stylesheet" href="{{fwurl}}parleweb/topnav.css">
+
+	<meta name="author" content="{{webmaster}}" />
+	<meta name="language" content="fr,en">
+	<meta name="rating" content="Safe For Kids" />
+	<meta name="revisit-after" content="3 Day" />
+	<meta name="robots" content="index, follow">
+
+
+	<style>
+	.content { margin: 2rem; }
+	.content h2 { font-size: 2rem; line-height: 1rem; }
+	</style>
+</head>
+<body>
+
+<section class="hero main">
+	<!-- NAVIGATION -->
+	<div class="hero-head">
+			<nav class="topnav has-shadow" role="navigation" aria-label="top navigation">
+				<div class="topnav-brand">
+					<a href="{{rooturl}}">
+						<img src="{{rooturl}}{{sourceurl}}{{brandimage}}" alt="{{brandimage}}" class="fluid"/>
+					</a>
+				</div>
+				<div class="topnav-menu">
+					<div class="topnav-menu--contactxx ">
+							<a href="{{rooturl}}{{menucontacturl}}" class="legend color1 topnav-menu--contact">
+									<div class="circle-1"><i class="fas fa-smile"></i></div>
+									<div class="legend-hide mobile-force">{{menucontact}}</div>
+							</a>
+					</div>
+				</div>
+			</nav>
+	</div>
+
+	<!-- MAIN -->
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        {{sectiontitle}}
+      </h1>
+      <div class="subtitle">
+        {{sectiondescription|safe}}
+      </div>
+			<div class="secondary-title">{{section2title}}</div>
+    </div>
+  </div>
+
+	<!-- TAB -->
+	<div class="hero-foot">
+     <nav class="tabs is-boxed xis-fullwidth">
+       <div class="container">
+         <ul>
+           <li class="is-active"><a>{{section2tab}}</a></li>
+           <li><a>{{section2tab2}}</a></li>
+					 <li><a>{{section2tab3}}</a></li>
+         </ul>
+       </div>
+     </nav>
+  </div>
+</section>
+
+
+
+<!-- SECONDARY -->
+<section class="secondary">
+	<div class="container">
+		<div class="content">{{content|safe}}</div>
+	</div>
+</section>
+
+
+<!-- NEWSLETTER -->
+<section class="third newsletter hero">
+	<div class="container">
+		<h2 class="newsletter-tag">{{actionlettretitle}}</h2>
+		<div class="newsletter-line">
+				<div class="newsletter-line--msg">{{actionlettredescription}}</div>
+		</div>
+	</div>
+</section>
+
+
+<!-- ADRESSE -->
+<section class="third adr hero">
+	<div class="container">
+		<h2 class="adr-tag">{{actioncontacttitle}}</h2>
+		<div class="adrfooter-line">
+				<ul>
+					<li class="adrfooter-line--brand">{{actioncontactbrand}}</li>
+					<li class="adrfooter-line--adr">{{actioncontactadresse}}</li>
+					<li class="adrfooter-line--tel">{{actioncontacttel}}</li>
+					<li class="adrfooter-line--courriel">{{actioncontactcourriel}}</li>
+				</ul>
+		</div>
+		<div class="adrfooter-social">
+				<ul>
+					<li class="adrfooter-social--instagram">{{actioncontactinstagram}}</li>
+				</ul>
+		</div>
+	</div>
+</section>
+
+
+<!-- SCRIPT -->
+
+<script defer src="{{fwurl}}fontawesome/5.0.0/all.js"></script>
+<script src="{{fwurl}}jquery/3.1.1/jquery.min.js"></script>
+
+
+<script>
+
+$(document).ready(function() {
+
+/* HOVER FOR DESKTOP */
+$(".legend").hover(function () {
+	if( $(document).width() > 500 ) {
+		$(this).find('.legend-hide').show();
+	}
+}, function () {
+    $(this).find('.legend-hide').hide();
+});
+
+/* */
+
+});
+
+
+
+</script>
+
+
+</body>
+</html>
