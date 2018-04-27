@@ -30,6 +30,8 @@ class PlwData(object):
 		self.idx = {}
 		self.myScan = PlwScan()
 		self.static_path = objcfg.static_path
+		self.jobending = []
+		self.activedatafile = ''
 
 	# LOAD
 	#	data from argument
@@ -95,7 +97,7 @@ class PlwData(object):
 		self.idx[metakey] = buf
 		self.idxcount += 1
 		logger.debug("json dump [%s] %d:" %(metakey, self.idxcount))
-		logger.debug(self.idx[metakey])
+		#logger.debug(self.idx[metakey])
 		#pprint(buf)
 		return True
 
@@ -125,8 +127,11 @@ class PlwData(object):
 			logger.info("%s: %s %s %s" % (keyname, scanname, scanfor, scanoption))
 			if( self.zenscan(scanname, scanfor, scanoption, sourcedata) == False ):
 				return False
-			#else:
-			#	htmlmetadata[keyname] = scanname # multiiple zenscan issue
+			# check if job to do after processing this data
+			if( scanoption.find('@build') == 0 ):
+				logger.info('find jobending')
+				self.jobending = [ self.source_pathdata, scanname, scanfor, scanoption, sourcedata ]
+
 
 		elif keyname[:7] == 'zenjson':
 			if keydata.find('.') == -1:
@@ -141,6 +146,10 @@ class PlwData(object):
 			logger.info("%s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, keydata) == False ):
 				return False
+
+		elif keyname[:11] == 'zentemplate' or keyname[:10] == 'zengabarit':
+			self.template = keydata
+			logger.info("%s: %s" % (keyname, keydata))
 
 		return True
 
@@ -159,7 +168,11 @@ class PlwData(object):
 
 	# LOAD_MARKDOWN
 	#	data from markdown file
-	def load_markdown(self, fdata):
+	def load_markdown(self, fdata, isprofile = False):
+		# reinitialize empty template for data
+		self.template = ''
+		del self.jobending[:] # clear jobending list (used in zenscan @build option)
+		self.activedatafile = fdata # data file to analyse
 
 		# set data filepath
 		#tmpsourceurl = fdata.partition('\\')[-1]
@@ -174,8 +187,8 @@ class PlwData(object):
 			datafile = fdata
 			self.source_pathdata = tmpsourceurl
 
-
-		logger.debug("fdata "+fdata)
+		logger.debug("############################################")
+		logger.debug("filename "+fdata)
 		logger.debug("tmpsourceurl "+tmpsourceurl)
 		logger.debug("source_pathdata "+self.source_pathdata)
 		logger.debug("datafile "+datafile)
@@ -209,14 +222,18 @@ class PlwData(object):
 
 		# add keywords
 		html.metadata['content'] = html
-		html.metadata['rooturl'] = self.root_url
-		html.metadata['fwurl'] = self.fw_url
-		html.metadata['homeurl'] = self.home_url
-		html.metadata['sourcedata'] = self.source_data
-		html.metadata['sourceurl'] = self.content_path+"/"+tmpsourceurl + "/"
-		html.metadata['staticurl'] = self.static_url
 		html.metadata['url'] = self.url[0]
-		html.metadata['webmaster'] = self.webmaster
+
+		if isprofile == True:
+			html.metadata['rooturl'] = self.root_url
+			html.metadata['fwurl'] = self.fw_url
+			html.metadata['homeurl'] = self.home_url
+			#html.metadata['sourcedata'] = self.source_data
+			#html.metadata['sourceurl'] = self.content_path+"/"+tmpsourceurl + "/"
+			html.metadata['staticurl'] = self.static_url
+			html.metadata['webmaster'] = self.webmaster
+
+
 		#logger.info("sourceurl : "+html.metadata['sourceurl'])
 		#logger.info("staticurl : "+html.metadata['staticurl'])
 
@@ -231,13 +248,13 @@ class PlwData(object):
 			logger.debug("number of index "+str(self.idxcount))
 			for keyname, datavalue in self.idx.items():
 				html.metadata[keyname] = datavalue
-				logger.debug(html.metadata[keyname])
+				#logger.debug(html.metadata[keyname])
 		# add profile
-		if bool(self.profile):
+		if isprofile == False:
 			html.metadata["profile"] = self.profile
 
 		# put data in memory
-		logger.debug(html.metadata)
+		#logger.debug(html.metadata)
 		self.load(html.metadata)
 		return True
 
@@ -254,13 +271,16 @@ class PlwData(object):
 
 	# WRITE
 	#	data from argument, template file, static file
-	def write(self, curdata, curtemplate, curstatic):
+	def write(self, curdata, curtemplate, curstatic='', isprofile = False):
 
 		# print("curtemplate "+curtemplate+" static "+curstatic)
 		# use template
 		# 	check if curtemplate have '.', if not add '.html'
 		# 	check if template is in list_templates() if not use index.html
-		if( '.' in curtemplate ):
+		if( curtemplate == '' ):
+			tmpfile = 'simple/page.html'
+
+		elif( '.' in curtemplate ):
 			tmpfile = curtemplate
 		else:
 			tmpfile = curtemplate + ".html"
@@ -304,6 +324,11 @@ class PlwData(object):
 		#logger.info("HTML FILE  "+myStaticfile)
 		#logger.info("JSON FILE "+myJsonfile)
 
+		if( isprofile == True ):
+			self.profile = self.data
+			self.data = { "profile" : self.profile }
+			logger.debug("initialize profile in json data")
+
 		# generate static html file from data and template
 		try:
 			myTemplate = self.config.templates_env.get_template(myTemplatefile)
@@ -344,4 +369,39 @@ class PlwData(object):
 		# generate json data file
 		if writeJson is True:
 			self.writejson(myJsonfile)
+		return True
+
+	# CHECK IF JOB ENDING IS ON
+	def ending(self):
+		if len(self.jobending) > 1:
+			activedatafile = self.activedatafile
+			sourcedir = self.jobending[0]
+			scanfor = self.jobending[2]
+			i = 0
+			del self.jobending[:]
+			logger.info("active data file "+activedatafile)
+			logger.info("JOBENDING STARTED IN "+sourcedir+" FOR "+scanfor+", activefilename "+activedatafile)
+			try:
+				for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
+					logger.debug("jobending find directory : " + dirpath)
+					if( len(files) > 0 ):
+						for filename in files:
+							if filename != activedatafile and filename.rfind(scanfor) != -1:
+								filetobuild = dirpath.split(self.original_source_path)[1]
+								if( filetobuild[:1] != '\\'):
+									filetobuild += '\\'
+								filetobuild += filename
+								if( filetobuild != activedatafile ):
+									logger.info("## jobending build : " + filetobuild)
+									if not self.load_markdown(filetobuild):
+										logger.critical("EMPTY DATA OR DATA WENT WRONG")
+										return False
+									if self.write(self.data, self.template) == False:
+										return False
+									i += 1
+
+			except Exception as e:
+					logger.critical("error jobending walking dir : "+sourcedir+" "+str(e))
+					return False
+			logger.debug("JOBENDING ENDED with "+str(i)+" files")
 		return True

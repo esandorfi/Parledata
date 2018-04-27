@@ -96,6 +96,7 @@ class PlwInit(object):
 		self.static = config['build']['static_path']
 		self.myData.home_url = config['build']['home_url']
 		self.myData.source_path = config['build']['source_path']
+		self.myData.original_source_path = config['build']['source_path']
 		self.original_source_path = config['build']['source_path']
 		self.myData.source_data = config['build']['profile_path']
 		self.myData.content_path = config['build']['data_path']
@@ -154,7 +155,7 @@ class PlwInit(object):
 
 	# ROUTE
 	# GENERATE HTML FILE
-	def route(self, fdata, ftemplate, fhtml = ''):
+	def route(self, fdata, ftemplate = '', fhtml = '', isprofile = False):
 		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
@@ -168,18 +169,23 @@ class PlwInit(object):
 
 		logger.info("#")
 		# WRITE STATIC WITH DATA AND TEMPLATE
-		if not self.myData.load_markdown(fdata):
+		if not self.myData.load_markdown(fdata, isprofile):
 			logger.critical("EMPTY DATA OR DATA WENT WRONG")
 			self.noError = False
 			return False
-		if ftemplate == '' and fhtml == '':
-			self.myData.profile = self.myData.data
-			logger.info("LOADING SHARED PROFILE DATA")
-			logger.debug(self.myData.profile)
-			self.noError = True
-		else:
-			self.noError = self.myData.write(self.myData.data, ftemplate, fhtml)
-		self.myScan.addidx(self.myData.data)
+		#import pdb; pdb.set_trace()
+		if ftemplate == '' and self.myData.template != '':
+			ftemplate = self.myData.template
+		if isprofile == True:
+			self.myData.profile = {}
+			logger.info("Initialize shared profile from "+fdata)
+
+		self.noError = self.myData.write(self.myData.data, ftemplate, fhtml, isprofile)
+
+		#if( self.noError == True)
+		#	self.noError = self.myScan.addidx(self.myData.data)
+		if( self.noError == True):
+			self.noError = self.myData.ending()
 		return self.noError
 
 	# CHANGE DATA PATH
@@ -241,7 +247,7 @@ class PlwInit(object):
 		if self.stopIfError is True and self.noError is False:
 			return False
 		logger.info("# load commun profile file : "+fdata)
-		self.route(fdata, '', '')
+		self.route(fdata, 'console/profile', '', True)
 
 	# ADDIDX
 	#	ADDIDX

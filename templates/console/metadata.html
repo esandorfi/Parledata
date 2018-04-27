@@ -1,0 +1,20 @@
+{#
+  template
+  metadata for profile
+#}
+
+{%if profile is defined %}
+
+    <table class="table">
+      <tr><td><strong>app :</strong></td><td>{{profile.app}}</td></tr>
+      <tr><td><strong>appdescription :</strong></td><td>{{profile.appdescription}}</td></tr>
+      <tr><td><strong>adrtel :</strong></td><td>{{profile.adrtel}}</td></tr>
+      <tr><td><strong>adrcourriel :</strong></td><td>{{profile.adrcourriel}}</td></tr>
+      <tr><td><strong>brand :</strong></td><td>{{profile.brand}}</td></tr>
+      <tr><td><strong>brandimage :</strong></td><td>{{profile.brandimage}}</td></tr>
+      <tr><td><strong>zencsv :</strong></td><td>{{profile.zencsv}}</td></tr>
+			<tr><td><strong>zengabarit :</strong></td><td>{{profile.zengabarit}}</td></tr>
+    </table>
+{%else%}
+	profile not defined
+{%endif%}

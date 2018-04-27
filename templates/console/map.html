@@ -1,0 +1,173 @@
+{% include 'ui/headz.html' %}
+<style>
+		.espacecentral { margin-top: 1rem; padding-bottom: 1rem; }
+		.espacecentral h1 { font-size: 2rem; padding-bottom: 1rem; padding-top: 2rem; }
+		.espacecentral h2 { font-size: 1.5rem; padding-bottom: .5rem; padding-top: 2rem; }
+		.espacecentral ul { list-style-type: square; margin-left: 1.5rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+		.has-text-left { text-align: left; }
+		.app { background-color: #fafafa; }
+		.appzencsv { padding-top: 2rem; }
+		.sitemap { width: 375px; background-color: #fff; }
+		.uldeep2 { padding-left: 1rem; xborder: 1px solid darkgray; }
+		.uldeep3 { padding-left: 1rem; xborder: 3px solid darkgray; }
+		.uldeep4 { padding-left: 1rem; xborder: 5px solid darkgray; }
+
+		.contentsize h1 { font-size: 2rem; padding-bottom: 3rem; margin-bottom: 1rem;  }
+		.breadcrumb { color: #fff; }
+		.breadcrumb a { color: #fff; }
+		.breadcrumb .active { font-weight: bold; }
+		.article { margin-bottom: 1rem; background-color: #fff; }
+		.article-header { padding-right: 1rem; padding-left: 1rem;  background: hsl(348, 100%, 61%); color: #fff;  }
+		.article-header .level { margin-bottom: 0; }
+		.article-header .pageinfo { padding: .5rem; border-top: 1px solid #fff; }
+		.article-header .pagetitle { font-size: 1.5rem; }
+		.sitemap-header { padding: .5rem 1rem; background: hsl(348, 100%, 61%); color: #fff; font-weight: bold; }
+</style>
+{% include 'ui/headzen.html' %}
+
+
+
+{% include 'ui/nav-profile-zencsv.html' %}
+<div class="app">
+
+
+{% if zenscan is defined %}
+<section class="appzencsv">
+	<div class="container">
+		<div class="columns">
+				<div class="column is-narrow">
+					<div class="card sitemap">
+						  <header class="card-header sitemap-header">
+								{{profile.brand|safe}}
+						  </header>
+						  <div class="card-content">
+								<ul class="zenscan">
+									{% for key, value in zenscan.items() %}
+										{% if value['deepclose'] > 0 %}
+											{% for i in range(value['deepclose']) %}
+												</ul></li>
+											{% endfor %}
+										{% endif %}
+										<li class="lideep{{value['deep']}}">{{key}}
+											{% if value['scanlen'] > 0 %}
+												<a href="#{{key}}">{{value['folder']}} ({{value['nbfiles']}})</a>
+											{% else %}
+												{{value['folder']}}
+											{% endif %}
+										{% if value['deepopen'] == 0 %}	</li>
+										{% elif value['deepsame'] == 1 %}	</li>
+										{% endif %}
+										{% if value['deepopen'] == 1 %}
+											<ul class="scan uldeep{{value['deep']}}">
+										{% endif %}
+									{% endfor %}
+								</ul>
+							</div>
+					</div>
+				</div>
+			<div class="column">
+				<div class="contentsize">
+					<h1 class="sitemap-header">{{pagetitle}}</h1>
+					{% for key, value in zenscan.items() %}
+						{% if value['scanlen'] > 0 %}
+
+							<div class="folder">
+								 {% for articlekey, articledata in value['scan'].items() %}
+								 		<a name="{{key}}"></a>
+										<div class="article card">
+											<header class="article-header">
+												<nav class="level">
+													<div class="level-left">
+														<div class="level-item chas-text-centered">
+															<div class="tags">
+																{%if articledata.gabarit is defined %}
+																	<span class="tag">{{articledata.gabarit}}</span>
+																{%endif%}
+																<span class="tag">{{key}}</span>
+															</div>
+
+														</div>
+														<div class="level-item has-text-centered">
+															{%if value['breadcrump'] is defined %}
+																<div class="breadcrumb" aria-label="breadcrumbs">
+																  <ul>
+																		{% for key in value['breadcrump'] %}
+																    <li><a href="#" {{ "class=active" if loop.last }}>{{key}}</a></li>
+																		{% endfor %}
+																  </ul>
+																</div>
+															{% endif %}
+														</div>
+													</div>
+													<div class="level-right">
+														<div class="level-item">
+															<div class="dropdown is-hoverable is-right">
+															  <div class="dropdown-trigger">
+															    <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menuaction">
+															      <span>actions</span>
+															      <span class="icon is-small">
+															        <i class="fas fa-angle-down" aria-hidden="true"></i>
+															      </span>
+															    </button>
+															  </div>
+															  <div class="dropdown-menu" id="dropdown-menuaction" role="menu">
+															    <div class="dropdown-content">
+															      <div class="dropdown-item">
+															        <a href="{{articledata['url']}}">voir l'url</a>
+															      </div>
+															    </div>
+															  </div>
+															</div>
+														</div>
+													</div>
+												</nav>
+												<div class="pageinfo">
+												{% if articledata['pagetitle'] is defined %}
+													<span class="pagetitle">{{articledata['pagetitle']}}</span> <small>(pagetitle)</small><br />
+												{% else %}
+													{{value['folder']}} <small>(no page title, use default folder name)</small><br />
+												{% endif %}
+												{% if articledata['pagedescription'] is defined %}
+													{{articledata['pagedescription']}} <small>(pagedescription)</small><br />
+												{% else %}
+													empty description <small>(better to set for seo)</small><br />
+												{% endif %}
+												</div>
+											</header>
+
+											<div class="card-content">
+												<div class="article-content wysiwyg">
+													{{articledata.content|safe}}<br />
+												</div>
+												{% if articledata.gabarit is defined %}
+													{% include 'cie/metadata.html' %}
+												{% endif %}
+											</div>
+										</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+{% endif %}
+
+<section class="espacecentral">
+	<div class="container">
+		{{content|safe}}
+	</div>
+</section>
+
+</div>
+{% include 'ui/foot-app.html' %}
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+{% include 'ui/footzen.html' %}

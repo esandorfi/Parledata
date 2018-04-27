@@ -106,9 +106,18 @@ class PlwScan(object):
 		return True
 
 
-	def scan(self, sourcedir, scanfor = '', soption = '@NONE', jsonfile = "idx.json"):
+	def scan(self, sourcedir, scanfor = '', soption = '@none', jsonfile = "idx.json"):
 		#if sourcedir[-1:] == '\\':
 		#	sourcedir = sourcedir[:-1]
+		#import pdb; pdb.set_trace()
+
+		# scan option :
+		#	@none
+		#	@files
+		#	@screenshot
+		#	@from=relative path to add to source dir
+		#
+
 		scanoption = soption.lower()
 		logger.info("ZENSCAN source %s for %s (option %s)" %(sourcedir, scanfor, scanoption))
 		isScanOnlyfiles = scanoption.find('@files')
@@ -122,8 +131,16 @@ class PlwScan(object):
 				logger.critical("Selenium Firefox can not be set up "+str(e))
 				logger.critical("No screenshot generated")
 				self.useweb = 0
-		#else:
-		#	self.useweb = 0
+		nbgeneration = -1
+		if( scanoption.find('@fromsourcepath') == 0 ):
+			if( scanoption.find('@fromsourcepath=') == 0 ):
+				sourcedir = self.source_path+scanoption[16:]
+			else:
+				sourcedir = self.source_path
+			logger.debug("change sourcedir for scan to "+sourcedir)
+		elif( scanoption.find('@fromabsolutepath=') == 0 ):
+			sourcedir = scanoption[18:]
+			logger.debug("change sourcedir for scan to "+sourcedir)
 
 		try:
 			for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
@@ -217,9 +234,10 @@ class PlwScan(object):
 				self.useweb = 0
 				del self.web
 			return ''
+		if( nbgeneration == -1):
+			logger.critical("find nothing in dir "+sourcedir)
+			return ''
 
-		#if( self.useweb ):
-		#	del self.web
 		# make deep to close and open <ul> analyse
 		lastdeep = 1
 		for keyid, data in reversed(sorted(self.toclist.items())):
@@ -261,8 +279,8 @@ class PlwScan(object):
 		#logger.info("toclist 2 " + str(self.toclist['2']))
 		data = self.toclist
 		#data = json.dumps(self.toclist, indent=4, sort_keys=True)
-		logger.debug("JSON DUMP")
-		logger.debug(data)
+		#logger.debug("JSON DUMP")
+		#logger.debug(data)
 
 
 
@@ -291,7 +309,7 @@ class PlwScan(object):
 		myFile.close()
 		myFileinfo = os.stat(fout)
 		logger.info("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
-		logger.debug(data)
+		#logger.debug(data)
 		return True
 
 	def scandir(self, dirpath, dirs, files):
@@ -469,6 +487,8 @@ class PlwScan(object):
 	#	set active url (for not include in scan)
 	def activeurl(self, url):
 		self.active_url = url
+
+
 
 # MAIN
 #
