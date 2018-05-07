@@ -49,7 +49,7 @@ class PlwData(object):
 			if not os.path.exists(datafile):
 				logger.critical("skip csv file %s - doesn't exist in %s or in %s " %(fdata, self.source_pathdata, self.static_path))
 				return False
-		logger.info("load csv file "+ datafile)
+		logger.debug("load csv file "+ datafile)
 		fcsv = open(datafile, 'r', encoding='utf-8')
 		try:
 			reader = csv.DictReader(fcsv, delimiter=';')
@@ -87,7 +87,7 @@ class PlwData(object):
 				if not os.path.exists(datafile):
 					logger.critical("skip json file %s - doesn't exist in %s or in %s " %(datafile, self.source_pathdata, self.static_path))
 					return False
-		logger.info("load json file "+ datafile)
+		logger.debug("load json file "+ datafile)
 		fjson = open(datafile, 'r', encoding='utf-8')
 		try:
 			buf = json.load(fjson)
@@ -124,12 +124,11 @@ class PlwData(object):
 				logger.critical("zenscan: myscan .md @files")
 				return False
 			sourcedata = self.source_pathdata #htmlmetadata['sourceurl']
-			logger.info("%s: %s %s %s" % (keyname, scanname, scanfor, scanoption))
+			logger.info("%s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
 			if( self.zenscan(scanname, scanfor, scanoption, sourcedata) == False ):
 				return False
 			# check if job to do after processing this data
 			if( scanoption.find('@build') == 0 ):
-				logger.info('find jobending')
 				self.jobending = [ self.source_pathdata, scanname, scanfor, scanoption, sourcedata ]
 
 
@@ -149,7 +148,7 @@ class PlwData(object):
 
 		elif keyname[:11] == 'zentemplate' or keyname[:10] == 'zengabarit':
 			self.template = keydata
-			logger.info("%s: %s" % (keyname, keydata))
+			logger.debug("%s: %s" % (keyname, keydata))
 
 		return True
 
@@ -266,7 +265,8 @@ class PlwData(object):
 			logger.critical("ERROR in json generation "+str(e))
 		myFile.close()
 		myFileinfo = os.stat(fout)
-		logger.info("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
+		logger.debug("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
+		#import pdb; pdb.set_trace()
 
 
 	# WRITE
@@ -289,7 +289,7 @@ class PlwData(object):
 		if myTemplatefile == '':
 			logger.critical("template not found : "+tmpfile)
 			return False
-		logger.info("use template : "+myTemplatefile)
+		logger.debug("use template : "+myTemplatefile)
 
 		# load data
 		self.load(curdata)
@@ -307,18 +307,18 @@ class PlwData(object):
 
 
 		if( '.' in curstatic ):
-			logger.info("1"+curstatic)
+			#logger.info("1 "+curstatic)
 			myStaticfile = self.config.static_path+curstatic
 			myJsonfile = myStaticfile.partition('.')[0]+".json"
 		elif curstatic == '':
 			myStaticfile = self.url[1]
-			logger.info("2"+myStaticfile)
+			#logger.info("2 "+myStaticfile)
 			if( '.' in myStaticfile ):
 				myJsonfile = myStaticfile.partition('.')[0]+".json"
 			else:
 				myJsonfile = myStaticfile+".json"
 		else:
-			logger.info("3"+curstatic)
+			#logger.info("3 "+curstatic)
 			myStaticfile = self.config.static_path+curstatic + ".html"
 			myJsonfile = self.config.static_path+curstatic + ".json"
 		#logger.info("HTML FILE  "+myStaticfile)
@@ -379,8 +379,8 @@ class PlwData(object):
 			scanfor = self.jobending[2]
 			i = 0
 			del self.jobending[:]
-			logger.info("active data file "+activedatafile)
-			logger.info("JOBENDING STARTED IN "+sourcedir+" FOR "+scanfor+", activefilename "+activedatafile)
+			logger.debug("active data file "+activedatafile)
+			logger.debug("# BUILD STARTED IN "+sourcedir+" FOR "+scanfor+", activefilename "+activedatafile)
 			try:
 				for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
 					logger.debug("jobending find directory : " + dirpath)
@@ -392,7 +392,8 @@ class PlwData(object):
 									filetobuild += '\\'
 								filetobuild += filename
 								if( filetobuild != activedatafile ):
-									logger.info("## jobending build : " + filetobuild)
+									logger.debug("#")
+									logger.debug("build : " + filetobuild)
 									if not self.load_markdown(filetobuild):
 										logger.critical("EMPTY DATA OR DATA WENT WRONG")
 										return False

@@ -3,132 +3,55 @@
 {% block css %}
 .size-a4 .content .appzencsv { position: absolute; top: 5cm; width: 100%; }
 .appzencsv { border: 1px solid black; padding: .5rem;  }
-
+.containerzenscan { position: absolute; right: 1rem; top: 1rem; width: 370px; z-index: 99; }
 {% endblock %}
 
 {% block zenscan %}
 
 {% if zenscan is defined %}
-<section class="zenscan">
-	<div class="container">
-		<div class="columns">
-				<div class="column is-narrow">
-					<div class="card sitemap">
-						  <header class="card-header sitemap-header">
-								{{profile.brand|safe}}
-						  </header>
-						  <div class="card-content">
-								<ul class="zenscan">
-									{% for key, value in zenscan.items() %}
-										{% if value['deepclose'] > 0 %}
-											{% for i in range(value['deepclose']) %}
-												</ul></li>
-											{% endfor %}
-										{% endif %}
-										<li class="lideep{{value['deep']}}">{{key}}
-											{% if value['scanlen'] > 0 %}
-												<a href="#{{key}}">{{value['folder']}} ({{value['nbfiles']}})</a>
-											{% else %}
-												{{value['folder']}}
-											{% endif %}
-										{% if value['deepopen'] == 0 %}	</li>
-										{% elif value['deepsame'] == 1 %}	</li>
-										{% endif %}
-										{% if value['deepopen'] == 1 %}
-											<ul class="scan uldeep{{value['deep']}}">
-										{% endif %}
-									{% endfor %}
-								</ul>
-							</div>
-					</div>
-				</div>
-			<div class="column">
-				<div class="contentsize">
-					<h1 class="sitemap-header">{{pagetitle}}</h1>
-					{% for key, value in zenscan.items() %}
+<div class="containerzenscan">
+	<div class="card sitemap">
+	  <header class="card-header sitemap-header">
+			{{profile.brand|safe}}
+	  </header>
+	  <div class="card-content">
+			<ul class="zenscan">
+				{% for key, value in zenscan.items() %}
+					{% if value['deepclose'] > 0 %}
+						{% for i in range(value['deepclose']) %}
+							</ul></li>
+						{% endfor %}
+					{% endif %}
+					<li class="lideep{{value['deep']}}">{{key}}
 						{% if value['scanlen'] > 0 %}
+							{{value['folder']}} ({{value['nbfiles']}})
+							<ul class="scanitem">
+							{% for articlekey, articledata in value['scan'].items() %}
+								<li><a href="{{articledata['url']}}">
+								{% if articledata['pagetitle'] is defined %}
+									{{articledata['pagetitle']}}
+								{% else %}
+									no page title
+								{% endif %}
+								</a>
+								</li>
+	 						{% endfor %}
+							</ul>
 
-							<div class="folder">
-								 {% for articlekey, articledata in value['scan'].items() %}
-								 		<a name="{{key}}"></a>
-										<div class="article card">
-											<header class="article-header">
-												<nav class="level">
-													<div class="level-left">
-														<div class="level-item chas-text-centered">
-															<div class="tags">
-																{%if articledata.gabarit is defined %}
-																	<span class="tag">{{articledata.gabarit}}</span>
-																{%endif%}
-																<span class="tag">{{key}}</span>
-															</div>
 
-														</div>
-														<div class="level-item has-text-centered">
-															{%if value['breadcrump'] is defined %}
-																<div class="breadcrumb" aria-label="breadcrumbs">
-																  <ul>
-																		{% for key in value['breadcrump'] %}
-																    <li><a href="#" {{ "class=active" if loop.last }}>{{key}}</a></li>
-																		{% endfor %}
-																  </ul>
-																</div>
-															{% endif %}
-														</div>
-													</div>
-													<div class="level-right">
-														<div class="level-item">
-															<div class="dropdown is-hoverable is-right">
-															  <div class="dropdown-trigger">
-															    <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menuaction">
-															      <span>actions</span>
-															      <span class="icon is-small">
-															        <i class="fas fa-angle-down" aria-hidden="true"></i>
-															      </span>
-															    </button>
-															  </div>
-															  <div class="dropdown-menu" id="dropdown-menuaction" role="menu">
-															    <div class="dropdown-content">
-															      <div class="dropdown-item">
-															        <a href="{{articledata['url']}}">voir l'url</a>
-															      </div>
-															    </div>
-															  </div>
-															</div>
-														</div>
-													</div>
-												</nav>
-												<div class="pageinfo">
-												{% if articledata['pagetitle'] is defined %}
-													<span class="pagetitle">{{articledata['pagetitle']}}</span> <small>(pagetitle)</small><br />
-												{% else %}
-													{{value['folder']}} <small>(no page title, use default folder name)</small><br />
-												{% endif %}
-												{% if articledata['pagedescription'] is defined %}
-													{{articledata['pagedescription']}} <small>(pagedescription)</small><br />
-												{% else %}
-													empty description <small>(better to set for seo)</small><br />
-												{% endif %}
-												</div>
-											</header>
-
-											<div class="card-content">
-												<div class="article-content wysiwyg">
-													{{articledata.content|safe}}<br />
-												</div>
-												{% if articledata.gabarit is defined %}
-													{% include 'cie/metadata.html' %}
-												{% endif %}
-											</div>
-										</div>
-								{% endfor %}
-							</div>
+						{% else %}
+							{{value['folder']}}
 						{% endif %}
-					{% endfor %}
-				</div>
-			</div>
+					{% if value['deepopen'] == 0 %}	</li>
+					{% elif value['deepsame'] == 1 %}	</li>
+					{% endif %}
+					{% if value['deepopen'] == 1 %}
+						<ul class="scan uldeep{{value['deep']}}">
+					{% endif %}
+				{% endfor %}
+			</ul>
 		</div>
 	</div>
-</section>
+</div>
 {% endif %}
 {% endblock %}

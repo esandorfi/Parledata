@@ -29,8 +29,8 @@ class PlwTemplate(object):
 		self.nbtemplates = 0
 		self.templates_path = tem
 		self.load_templates()
-		logger.info("# template_path : %s, load %d templates " %(self.templates_path, self.nbtemplates))
-		logger.info("# templates defined : "+str(self.templates_env.list_templates()))
+		logger.info("template_path : %s, load %d templates " %(self.templates_path, self.nbtemplates))
+		logger.debug("templates defined : "+str(self.templates_env.list_templates()))
 		self.set_staticpath(sta)
 
 	# SET STATIC PATH

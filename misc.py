@@ -36,9 +36,28 @@ class StringMetadata(str):
 #	full filename
 def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 	#import pdb; pdb.set_trace()
-	logger.debug("# geturl source file %s path %s, static url %s path %s" %(sourcefile, source_path, static_url, static_path) )
+	logger.debug("### geturl source file %s path %s, static url %s path %s" %(sourcefile, source_path, static_url, static_path) )
 
 	sourcefile = sourcefile.lower()
+
+	p, f = os.path.split(sourcefile)
+	#logger.debug("split p "+p+" f "+f)
+
+	# check if sourcefile has order
+	lenspace = f.find(' ')
+	if( lenspace != -1 and lenspace < 4 ):
+		order = f[:lenspace]
+		f = f[lenspace+1:]
+		logger.debug('order is ['+order+'], file : '+f)
+	sourcefile = p + "\\" + f
+	# return url with path convention
+	if f.find('.'):
+		furl = f.split('.')[0]
+	else:
+		furl = f
+
+
+
 	# remove extension
 	if sourcefile.find('.'):
 		if sourcefile.find('.md') != -1:
@@ -49,7 +68,9 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 	else:
 		filename = sourcefile+'.html'
 
-	logger.debug("filename is "+filename)
+
+
+	#logger.debug("filename is "+filename)
 
 	# remove source_path if any
 	if source_path != '':
@@ -63,7 +84,9 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		fullfilename = filename
 	else:
 		fullfilename = static_path+filename
-	logger.debug("static file: "+fullfilename)
+
+	fullfilename = re.sub(r"[^\w\\\\:.]", '-', fullfilename)
+	#logger.debug("static file: "+fullfilename)
 
 	path = os.path.dirname(fullfilename)
 	if not os.path.exists(path):
@@ -80,9 +103,11 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		filename = filename[len(source_path):]
 		logger.info(" filename now just is "+filename)
 
+	filename = re.sub(r"[^\w\\\\:.]", '-', filename)
 	url = (static_url + filename).replace('\\', '/')
+
 	logger.debug("url: "+url)
-	return [ url, fullfilename ]
+	return [ url, fullfilename, furl ]
 
 
 # PlwWeb

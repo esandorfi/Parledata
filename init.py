@@ -246,7 +246,7 @@ class PlwInit(object):
 
 		if self.stopIfError is True and self.noError is False:
 			return False
-		logger.info("# load commun profile file : "+fdata)
+		logger.debug("# load commun profile file : "+fdata)
 		self.route(fdata, 'console/profile', '', True)
 
 	# ADDIDX
@@ -257,4 +257,4 @@ class PlwInit(object):
 			return False
 
 		self.myData.idxjson[idxname] = idxpath;
-		logger.info("add idx [%s] from %s" %(idxname, idxpath))
+		logger.debug("add idx [%s] from %s" %(idxname, idxpath))

@@ -30,7 +30,7 @@ class StringMetadata(str):
 # Generate Index files
 #
 class PlwScan(object):
-	def __init__(self, outpath=''):
+	def __init__(self, outpath='', sourcepath=''):
 		self.static_idx_path = outpath
 
 		self.routeidx = {}
@@ -43,7 +43,7 @@ class PlwScan(object):
 		self.screenshot_url = '' # where screenshot images are generated as url
 
 		self.static_url = ''  # which server is used to load web pages
-		self.source_path = '' # what is the drive path
+		self.source_path = sourcepath.lower() # what is the drive path
 
 
 		# set by activeurl()
@@ -119,7 +119,7 @@ class PlwScan(object):
 		#
 
 		scanoption = soption.lower()
-		logger.info("ZENSCAN source %s for %s (option %s)" %(sourcedir, scanfor, scanoption))
+		logger.debug("ZENSCAN source %s for %s (option %s)" %(sourcedir, scanfor, scanoption))
 		isScanOnlyfiles = scanoption.find('@files')
 		isScreenshot = scanoption.find('@screenshot')
 		if( isScreenshot == 0 ):
@@ -149,11 +149,16 @@ class PlwScan(object):
 
 				# root
 				if( dirnum == 0):
-					self.idxroot = dirpath
+					self.idxroot = dirpath.lower()
 					self.idxgeneration = nbgeneration
 					self.generation = 0
 					self.parent = 0
-					self.idx = self.idxroot
+					#self.idx = self.idxroot
+					#self.idx = dirpath.split('\\')[:-1]
+					self.idx = self.idxroot.split(self.source_path)[-1]
+					#if( self.idx[-1] == '\\' ):
+					#	self.idx = self.idx[:-1]
+
 					self.scanid = []
 					self.scanid.append(1) # check if ok
 					self.lenidbefore = 0
@@ -168,11 +173,11 @@ class PlwScan(object):
 							# previous generation
 							idtoremove = self.parent-nbgeneration
 							del self.scanid[-idtoremove:]
-							logger.info('breadcrump len '+str(len(self.breadcrump)))
+							#logger.debug('breadcrump len '+str(len(self.breadcrump)))
 							idtoremove += 1
 							del self.breadcrump[-idtoremove:]
-							logger.info('breadcrump len '+str(len(self.breadcrump)))
-							logger.info("previous generation nb to remove "+str(idtoremove))
+							#logger.debug('breadcrump len '+str(len(self.breadcrump)))
+							#logger.debug("previous generation nb to remove "+str(idtoremove))
 							self.countid = self.scanid[-1] + 1
 							self.scanid[-1] = self.countid
 						else:
@@ -318,7 +323,10 @@ class PlwScan(object):
 		scanid = '.'.join(map(str, self.scanid))
 
 		info = {}
-		info['folder'] = self.idx
+		if( self.idx[-1] == '\\'):
+			info['folder'] = self.idx[:-1]
+		else:
+			info['folder'] = self.idx
 		info['nbfiles'] = nbfiles
 
 		# manage deep as
@@ -396,8 +404,9 @@ class PlwScan(object):
 
 				logger.debug("load "+fnamext+" file from scan "+ fname)
 				url = plw_get_url(fname, self.static_path, self.static_url, self.source_path)
-				logger.info('url %s file %s' %(url[0], url[1]))
+				logger.debug('url %s fname %s file %s' %(url[0], url[2], url[1]))
 				html.metadata['url'] = url[0]
+				html.metadata['fname'] = url[2]
 				html.metadata['content'] = html
 				#html.metadata['scanfile'] = fname
 				html.metadata['contentsize'] = statinfo.st_size
@@ -406,7 +415,7 @@ class PlwScan(object):
 
 				logger.debug('active url %s and %s' %(self.active_url, url[0]))
 				if( self.active_url != '' and self.active_url == url[0] ):
-					logger.info('not include file as active url : ' + self.active_url)
+					logger.debug('not include file as active url : ' + self.active_url)
 				else:
 					self.toclist[tocid]['scan'][i] = {}
 					self.toclist[tocid]['scan'][i] = html.metadata
