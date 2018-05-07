@@ -27,13 +27,7 @@
 							{{value['folder']}} ({{value['nbfiles']}})
 							<ul class="scanitem">
 							{% for articlekey, articledata in value['scan'].items() %}
-								<li><a href="{{articledata['url']}}">
-								{% if articledata['pagetitle'] is defined %}
-									{{articledata['pagetitle']}}
-								{% else %}
-									no page title
-								{% endif %}
-								</a>
+								<li><a href="{{articledata['url']}}">{{articledata['fname']}}</a>
 								</li>
 	 						{% endfor %}
 							</ul>

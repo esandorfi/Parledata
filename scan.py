@@ -165,7 +165,10 @@ class PlwScan(object):
 					self.countid = 1
 					self.tochtml = []
 					self.toclist = {}
-					self.breadcrump = []
+					if( self.idx[-1] == '\\' ):
+						self.breadcrump = [ self.idx[-1] ]
+					else:
+						self.breadcrump = [ self.idx ]
 				else:
 				# parent and child numerotation into list scanid as [1, 1, 2, 1...]
 					if( self.parent != nbgeneration ):
@@ -449,7 +452,6 @@ class PlwScan(object):
 
 		if screenshot_url != '':
 			self.screenshot_url = screenshot_url.lower()
-
 
 		if screenshot_static_path != '':
 			self.screenshot_static_path = screenshot_static_path.lower()

@@ -380,15 +380,17 @@ class PlwData(object):
 			i = 0
 			del self.jobending[:]
 			logger.debug("active data file "+activedatafile)
+
 			logger.debug("# BUILD STARTED IN "+sourcedir+" FOR "+scanfor+", activefilename "+activedatafile)
 			try:
 				for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
 					logger.debug("jobending find directory : " + dirpath)
 					if( len(files) > 0 ):
 						for filename in files:
+							#import pdb; pdb.set_trace()
 							if filename != activedatafile and filename.rfind(scanfor) != -1:
 								filetobuild = dirpath.split(self.original_source_path)[1]
-								if( filetobuild[:1] != '\\'):
+								if( filetobuild[-1] != '\\'):
 									filetobuild += '\\'
 								filetobuild += filename
 								if( filetobuild != activedatafile ):
