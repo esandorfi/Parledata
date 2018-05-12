@@ -9,12 +9,13 @@ global logger
 
 
 def loginit(fdebug = 0, fname = verPackage):
-	logger = logging.getLogger(fname)
-	if logger.handlers:
-		return logger
+
+	#logger = logging.getLogger(__name__)
+	#if logger.handlers:
+	#	return logger
 
 	flevel = logging.INFO if fdebug == 0 else logging.DEBUG
-	logname = verPackage+'.log'
+	logname = fname+'.log'
 	try:
 		os.remove(logname)
 	except:
@@ -31,7 +32,7 @@ def loginit(fdebug = 0, fname = verPackage):
 	formatter = logging.Formatter('%(filename)s:%(lineno)-4d %(levelname)-6s %(message)s')
 	console.setFormatter(formatter)
 	logging.getLogger('').addHandler(console)
-	logger = logging.getLogger(fname)
+	logger = logging.getLogger(__name__)
 	return logger
 
 def loglevel(fdebug = 0):
@@ -39,5 +40,5 @@ def loglevel(fdebug = 0):
 	logger.setLevel(flevel)
 	logger.info("set level to "+str(flevel))
 
-
-logger = loginit()
+logger = logging.getLogger(__name__)
+#logger = loginit()

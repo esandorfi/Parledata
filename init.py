@@ -17,7 +17,7 @@ from pprint import pprint
 
 
 # parladata global string
-verPackage = "parladata"
+verPackage = "parledata"
 
 # parladata package
 from .log import logger, loglevel
@@ -29,7 +29,7 @@ import logging
 # GLOBAL VARIABLES
 # info
 
-WEBMASTER = 'Parladata from Parle Web'
+WEBMASTER = 'Parledata from Parle Web'
 
 # return dict values
 def get_v(data, *args):

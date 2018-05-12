@@ -15,7 +15,7 @@ import json
 import csv
 from PIL import Image
 
-# parladata package
+
 from .log import logger
 
 

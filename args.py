@@ -1,7 +1,7 @@
 import sys, os, argparse
 import yaml
 import logging
-from .log import logger
+from .log import logger, loginit
 
 def args():
 	parser = argparse.ArgumentParser()
@@ -15,6 +15,9 @@ def args():
 
 class PlwConfig():
 	def __init__(self, profilename = ''):
+		#import pdb; pdb.set_trace()
+		#global logger
+		logger = loginit(0, profilename)
 		self.profilename = profilename
 		self.config = {}
 		if( profilename != ''):
