@@ -1,10 +1,10 @@
 # -*-coding:utf-8 -*-
 """
-PACKAGE Parladata
+PACKAGE Parledata
 
 """
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 
 # import sub modules

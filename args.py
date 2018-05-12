@@ -18,7 +18,7 @@ class PlwConfig():
 		self.profilename = profilename
 		self.config = {}
 		if( profilename != ''):
-			logger.info("--- PARLADATA BUILD WITH "+profilename)
+			logger.info("--- PARLEDATA BUILD WITH "+profilename)
 			self.config = self.read(profilename)
 
 	def save(self, fname, dictcfg):

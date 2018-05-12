@@ -1,5 +1,5 @@
 
-# Parladata 0.V4
+# Parledata V0.5
 
 écrit par Emmanuel Sandorfi
 parleweb.fr
