@@ -3,14 +3,14 @@
 		use zendebug: 1 from markdown/json to include debug help
 #}
 
-{% if profile.nofw is not defined  %}
+{% if profile is not defined or profile.nofw is not defined  %}
 <script defer src="{{profile.fwurl}}fontawesome/5.0.0/all.js"></script>
 <script defer src="{{profile.fwurl}}bulma/bulma-accordion.min.js"></script>
-{# <script src="{{profile.fwurl}}jquery/3.1.1/jquery.min.js"></script> #}
+<script src="{{profile.fwurl}}jquery/3.1.1/jquery.min.js"></script>
 {# <script src="{{profile.staticurl}}oo/parladata.js"></script> #}
 {% endif %}
 {% if zendebug is defined %}
 	{% include 'ui/js-debug.html' %}
-{% elif profile.zendebug is defined %}
+{% elif profile is defined and profile.zendebug is defined %}
 	{% include 'ui/js-debug.html' %}
 {% endif %}

@@ -14,7 +14,7 @@ import markdown2
 import json
 import csv
 from PIL import Image
-
+import shutil
 
 from .log import logger
 
@@ -28,6 +28,65 @@ class PlwMedia(object):
 
 	def __del__(self):
 		pass
+
+	def copyfile(self, foldername, sourcedir, targetdir, scanfor = '.jpg', scanoption = '@all', jsonfile = "copyfile.json"):
+		if( targetdir[-1] != '\\' ):
+			targetdir += "\\"
+		logger.info("COPYFILE source %s to %s for %s (option %s)" %(sourcedir, targetdir, scanfor, scanoption))
+
+		isOk = True
+		isScanOnlyfiles = scanoption.lower().find('@files')
+		logger.info("isScanOnlyfiles "+str(isScanOnlyfiles))
+		imagelist = {}
+		try:
+			for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
+				nbFiles = 0
+				for filename in files:
+					filenamenoext = filename.split(".")[0].lower()
+					filename = filename.lower()
+					fname = os.path.join(dirpath,filename).lower()
+					if fname.endswith(scanfor):
+						nbFiles += 1
+
+						if( isScanOnlyfiles == -1 ):
+							subdir = dirpath[len(sourcedir):]
+							if subdir[-1] != '\\':
+								subdir += '\\'
+							newfile = targetdir+subdir+filename
+							logger.debug("dir "+dirpath + " subdir "+subdir+" file "+filename)
+						else:
+							newfile = targetdir+filename
+
+
+						try:
+							logger.debug('copy %s in %s' %(fname, newfile))
+							shutil.copy(fname, newfile)
+						except FileNotFoundError:
+							getdir = os.path.dirname(newfile)
+							logger.info("create directory "+getdir+" from "+newfile)
+							try:
+								os.makedirs(getdir, 0o777)
+								shutil.copy(fname, newfile)
+							except:
+								raise
+
+				if( nbFiles > 0 ):
+					logger.info("find in directory %s : %d files like %s" %(dirpath, nbFiles, scanfor))
+				if isScanOnlyfiles >= 0:
+					imagelist['folder'] = foldername
+					imagelist['nbfiles'] = nbFiles
+					break
+
+		except ValueError as e:
+				logger.critical("Error copyfile "+cstr(e))
+				isOk = False
+
+		newjson = targetdir+jsonfile
+		isOk = self.jsondir(newjson, imagelist)
+
+		return isOk
+
+
 
 	# scanimage
 	#	copy image to static path

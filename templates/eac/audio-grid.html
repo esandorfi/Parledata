@@ -1,0 +1,217 @@
+{% include 'ui/headz.html' %}
+<style>
+body { background-color: #fafafa; }
+.container-snapshot { position: relative; clear: both; z-index: 3; margin: auto; width: 95%; }
+.snapshot { position: relative; xwidth: 45%; xheight: 360px; padding: 0; margin: 1rem; }
+.snapshot-legend { position: absolute; bottom: 0rem; left: 0rem; font-size: 2rem; color: black; xline-height: 0.1rem; background-color: #fafafa; width: 100%; padding-left: 10px;}
+.snapshot-img { position: relative; }
+.snapshot-img img { xborder: 2px solid black; padding: 0; margin: 0; opacity: 0.5; }
+.snapshot-action { position: absolute; bottom: 2rem; right: 2rem; visibility: hidden; }
+.snapshot-action a { font-size: 4rem; background-color: red; color: white;
+ border-radius: 50px; padding: 10px; box-shadow: 2px 2px 2px #fafafa;}
+
+.snapshot-polaroid {
+padding: 10px 10px 5px 10px;
+ border: 1px solid #BFBFBF;
+ background-color: #fff;
+ box-shadow: 10px 10px 5px #aaaaaa;
+ }
+
+.display-fullscreen {
+ width: 100vw;
+ height: 100vh;
+ xborder: 5px solid red;
+ position: fixed;
+ top: 0;
+ left: 0;
+ z-index: 100;
+ background-color: #fff;
+ visibility: hidden;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ cursor: pointer;
+ display: flex;
+ flex-direction: row;
+}
+.display-fullscreen .content-visual { visibility: inherit; width: 55%; height: 100%; background-size: auto 100%; background-repeat: no-repeat; }
+.display-fullscreen .content-txt { background-color:#2B3B8E; visibility: inherit; width: 45%; height: 100%; }
+.display-fullscreen .content-txt .data {  visibility: inherit; }
+.display-fullscreen .content-txt .txt { padding-left: 2rem; font-size: 1.1rem; color: #fff;  }
+.display-fullscreen .content-txt .txt em { font-size: 1rem; line-height: 1.3rem; display: inline-block; opacity: 0.5; padding-top: .5rem; }
+.display-fullscreen .content-txt .legend { padding: 1rem; font-size: 2rem; color: #fff;
+	line-height: 4rem; visibility: inherit; }
+.display-fullscreen .content-txt .legend span:first-child  { background-color: #83ab4d; color: #fff; padding: 0.5rem 1rem; }
+.display-fullscreen .content-txt .legend span:nth-child(2)  { background-color: #0924AB; color: #fff; padding: 0.5rem 1rem; }
+.display-fullscreen .content-txt .legend span:nth-child(4)  { color: #fff; font-weight: bold; padding: 0.5rem 1rem; }
+
+.display-fullscreen .content-txt .close { padding-left: 1em; padding-top: 1rem; visibility: inherit;
+	display: flex; flex-direction: row; align-items: center; line-height: 1.3rem;
+ color: #fff; }
+.display-fullscreen .content-txt .close a { font-size: 2rem;  color: fff;
+ border-radius: 50%; padding: 5px; box-shadow: 2px 2px 2px #fff; margin-right: 1rem;
+display: inline-block; width: 3rem; text-align: center; opacity: 0.5;
+	}
+
+</style>
+{% include 'ui/headzen.html' %}
+
+<div class="hero">
+	<div class="hero-body">
+		<div class="title">
+			{{ pagetitle }}
+		</div>
+		<div class="subtitle">
+			<strong>{{ equipe }}</strong><br />
+			{{ direction }}<br />
+			{{ duree }}
+		</div>
+	</div>
+</div>
+
+<div class="display-fullscreen">
+
+	<div class="content-txt">
+	 	<div class="data"></div>
+	  <div class="legend"></div>
+		<div class="txt">
+			{{ content|safe }}
+		</div>
+	  <div class="close"><a href="#"><i class="fas fa-arrow-left"></i></a>{{ classe|safe }}</div>
+	</div>
+
+	<div class="content-visual">
+	</div>
+
+</div>
+
+{% if zenimg is not defined %}
+Parle Data information :<br />
+Erreur de Configuration - Contexte des données <br />
+<br />ZENIMG Manquant
+{% endif %}
+
+{% if zenimg is not defined %}
+Parle Data information :<br />
+Erreur de Configuration - Contexte des données <br />
+<br />AUDIODIR Manquant
+{% endif %}
+
+{% if zencsv is defined %}
+<div class="container-snapshot">
+  <div class="title is-ancestor">
+		<div class="title is-parent">
+
+			{% for mydata in zencsv %}
+
+		     <div class="title is-child snapshot snapshot-polaroid" data-action="audio" data-value="{{ mydata.audio }}" data-background="{{ mydata.img }}" data-legend="{{ mydata.prenom }}" data-bgposition="{{ mydata.bgposition}}">
+		        <div class="snapshot-img">
+
+							{%if zenimg[mydata.img] is defined %}
+							<img src="{{ zenimg.folder }}/{{ zenimg[mydata.img].src }}" width="{{ zenimg[mydata.img].srcw }}" height="{{ zenimg[mydata.img].srch }}" class="img-fluid" />
+							{% endif %}
+
+							{#<img src="p1050420.jpg" class="img-fluid">#}
+						</div>
+		        <div class="snapshot-legend">{{ mydata.prenom }} {{ mydata.nom }} - {{ mydata.naissance }}</div>
+		        <div class="snapshot-action"><a href="#"><i class="fas fa-volume-up"></i></a></div>
+		     </div>
+
+			 {% endfor %}
+
+
+		</div>
+	</div>
+</div>
+{% else %}
+Parle Data information :<br />
+Erreur de Configuration - Contexte des données <br />
+<br />ZENCSV manquant
+{% endif %}
+
+
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+<script>
+
+$( ".snapshot" )
+.mouseenter(function() {
+	$( this ).find( "img" ).css( { "opacity": "1", "cursor": "pointer"} );
+	$( this ).find( ".snapshot-legend" ).css( "visibility", "hidden" );
+	$( this ).find( ".snapshot-action" ).css( "visibility", "visible" );
+})
+.mouseleave(function() {
+	$( this ).find( "img" ).css( { "opacity": "0.5", "cursor": "auto"} );
+	$( this ).find( ".snapshot-legend" ).css( "visibility", "visible" );
+	$( this ).find( ".snapshot-action" ).css( "visibility", "hidden" );
+})
+.click(function() {
+	action = $( this ).attr( "data-action" );
+	value = $( this ).attr( "data-value" );
+
+	if( action == 'audio' )
+	{
+		dir_bg = "{{ profile.staticurl }}{{ zenimg.folder }}/"
+		dir_audio = "{{ profile.staticurl }}{{ audiodir }}/"
+
+
+		value_bg = $( this ).attr( "data-background" );
+		value_bgposition = $( this ).attr( "data-bgposition" );
+		if( value_bgposition == 'None' || value_bgposition == '' )
+			value_bgposition = "top center"
+		value_legend = $( this ).attr( "data-legend" );
+		html_legend = "<span>"+value_legend+"</span> <span>dit un poème</span><br /> <span>pour son papa</span>";
+
+		html = "<audio src='"+dir_audio+value+"' autoplay volume='1.0' >Votre navigateur ne supporte pas l'élément <code>audio</code>.</audio>";
+
+
+		console.log(value_bgposition);
+		bgurl = "url('"+dir_bg+value_bg+".jpg')";
+		$( ".display-fullscreen .content-visual" ).css( "background-image", bgurl );
+		$( ".display-fullscreen .content-visual" ).css( "background-position", value_bgposition );
+		$( ".display-fullscreen .content-txt .legend" ).html( html_legend );
+		$( ".display-fullscreen .content-txt .data" ).html( html );
+
+		$( ".display-fullscreen" ).css( "visibility", "visible" );
+
+
+
+
+	}
+	else if( action == 'video' )
+	{
+		value_legend = $( this ).attr( "data-legend" );
+		html_legend = "<strong>"+value_legend+"</strong> dansent les émotions</strong>";
+
+		html = "<iframe id='ytplayer' type='text/html' width='900px' height='600px' src='https://www.youtube.com/embed/"+value+"?autoplay=1&controls=0&rel=0&showinfo=0' frameborder='0' allowfullscreen>";
+
+		 $( ".display-fullscreen .content-txt .legend" ).html( html_legend );
+		$( ".display-fullscreen .content-txt .data" ).html( html );
+
+		$( ".display-fullscreen .content-visual" ).css( "background", "none" );
+		$( ".display-fullscreen .content-visual" ).css( "background-color", "#000" );
+		$( ".display-fullscreen" ).css( "display", "visible" );
+	}
+	else alert('no action defined');
+});
+
+$( ".display-fullscreen" )
+.click(function() {
+	$( this ).css( "visibility", "hidden" );
+	$( this ).find( ".content-txt .data" ).html( "" );
+});
+
+$( ".display-fullscreen .content-txt .close" )
+.click(function() {
+	$( ".display-fullscreen" ).css( "visibility", "hidden" );
+	$( ".display-fullscreen .content-txt .data" ).html( "" );
+
+});
+</script>
+
+
+{% include 'ui/footzen.html' %}

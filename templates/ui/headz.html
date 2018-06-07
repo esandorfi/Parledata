@@ -7,16 +7,17 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{{pagetitle}}</title>
+	<title>{{ pagetitle }}</title>
 	<meta name="description" content="{{pagedescription}}">
 
-	{% if profile.nofw is not defined %}
+	{% if profile is not defined or profile.nofw is not defined %}
 	<link rel="stylesheet" href="{{profile.fwurl}}bulma/0.6.2/bulma.min.css">
 	<link rel="stylesheet" href="{{profile.fwurl}}bulma/bulma-accordion.min.css">
-	<link rel="stylesheet" href="{{profile.fwurl}}bulma/wysiwyg.css">
 	{% endif %}
 
-	<meta name="author" content="{{profile.webmaster}}" />
+	{% if profile is defined and profile.webmaster is defined %}
+	<meta name="author" content="{{ profile.webmaster }}" />
+	{% endif %}
 	<meta name="language" content="fr">
 	<meta name="rating" content="Safe For Kids" />
 	<meta name="revisit-after" content="3 Day" />

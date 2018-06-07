@@ -5,6 +5,7 @@ data.py
 # IMPORT
 import sys
 import os
+import errno
 import datetime
 import logging
 
@@ -12,6 +13,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoad
 import markdown2
 import json
 import csv
+import yaml
 from pprint import pprint
 
 # parladata package
@@ -76,6 +78,39 @@ class PlwData(object):
 		logger.debug(self.idx[metakey])
 		return True
 
+	# LOAD_YAML
+	#	data from yaml file
+	def load_yaml(self, metakey, fdata):
+		datafile = fdata
+		if not os.path.exists(datafile):
+			datafile = self.source_pathdata+fdata
+			if not os.path.exists(datafile):
+				datafile = self.static_path+fdata
+				if not os.path.exists(datafile):
+					datafile = self.idxjson_path+fdata
+					if not os.path.exists(datafile):
+						logger.critical("skip yaml file %s - doesn't exist in %s or in %s or in %s" %(fdata, self.source_pathdata, self.static_path, self.idxjson_path))
+						return False
+		logger.debug("load yaml file "+ datafile)
+		fjson = open(datafile, 'r', encoding='utf-8')
+		try:
+			buf = list(yaml.load_all(fjson))
+		except yaml.YAMLError as exc:
+			logger.critical("YAML ERROR in "+datafile)
+			if hasattr(exc, 'problem_mark'):
+				mark = exc.problem_mark
+				logger.critical("YAML ERROR position: (%s:%s)" % (mark.line+1, mark.column+1))
+			return False
+		#import pdb; pdb.set_trace()
+		self.idx[metakey] = buf
+		self.idxcount += 1
+		logger.debug("yaml dump [%s] %d:" %(metakey, self.idxcount))
+		pprint(self.idx[metakey])
+		return True
+
+
+
+
 	# LOAD_JSON
 	#	data from json file
 	def load_json(self, metakey, fdata):
@@ -131,6 +166,12 @@ class PlwData(object):
 			if( scanoption.find('@build') == 0 ):
 				self.jobending = [ self.source_pathdata, scanname, scanfor, scanoption, sourcedata ]
 
+		elif keyname[:7] == 'zenyaml':
+			if keydata.find('.') == -1:
+				keydata += '.yaml'
+			logger.info("%s: %s" % (keyname, keydata))
+			if( self.load_yaml(keyname, keydata) == False ):
+				return False
 
 		elif keyname[:7] == 'zenjson':
 			if keydata.find('.') == -1:
@@ -167,7 +208,7 @@ class PlwData(object):
 
 	# LOAD_MARKDOWN
 	#	data from markdown file
-	def load_markdown(self, fdata, isprofile = False):
+	def load_markdown(self, fdata, isprofile = False, otherfilename = ''):
 		# reinitialize empty template for data
 		self.template = ''
 		del self.jobending[:] # clear jobending list (used in zenscan @build option)
@@ -188,11 +229,12 @@ class PlwData(object):
 
 		logger.debug("############################################")
 		logger.debug("filename "+fdata)
+		logger.debug("filename set as other : "+otherfilename)
 		logger.debug("tmpsourceurl "+tmpsourceurl)
 		logger.debug("source_pathdata "+self.source_pathdata)
 		logger.debug("datafile "+datafile)
 
-		self.url = plw_get_url(fdata, self.config.static_path, self.static_url, self.source_path) # url, filename
+		self.url = plw_get_url(otherfilename if otherfilename != '' else fdata, self.config.static_path, self.static_url, self.source_path) # url, filename
 
 		# verify if data metadata still in memory
 		if self.idxcount > 0:
@@ -258,7 +300,19 @@ class PlwData(object):
 		return True
 
 	def writejson(self, fout):
-		myFile = open(fout, "w", encoding='utf-8')
+		try:
+			myFile = open(fout, "w", encoding='utf-8')
+		except FileNotFoundError as e:
+			getdir = os.path.dirname(fout)
+			logger.info("create directory "+getdir+" from "+fout)
+			try:
+				os.makedirs(getdir, 0o777)
+			except OSError as e:
+				if e.errno != errno.EEXIST:
+					raise
+			myFile = open(fout, "w", encoding='utf-8')
+
+
 		try:
 			json.dump(self.data, myFile, indent=4)
 		except ValueError as e:
@@ -310,6 +364,7 @@ class PlwData(object):
 			#logger.info("1 "+curstatic)
 			myStaticfile = self.config.static_path+curstatic
 			myJsonfile = myStaticfile.partition('.')[0]+".json"
+
 		elif curstatic == '':
 			myStaticfile = self.url[1]
 			#logger.info("2 "+myStaticfile)
@@ -328,6 +383,9 @@ class PlwData(object):
 			self.profile = self.data
 			self.data = { "profile" : self.profile }
 			logger.debug("initialize profile in json data")
+			if writeJson is True:
+				self.writejson(myJsonfile)
+			return True
 
 		# generate static html file from data and template
 		try:

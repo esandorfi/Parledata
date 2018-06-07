@@ -1,5 +1,9 @@
 {% include 'ui/headz.html' %}
 <link rel="stylesheet" href="{{profile.fwurl}}fonts/14-officina.css">
+{#
+	CSS GRADIENT
+	https://mycolor.space/gradient?ori=to+right+bottom&hex=%23FDD0BB&hex2=%23FA5509&sub=1
+#}
 <style>
 		.espacecentral { margin-top: 1rem; margin-bottom: 5rem; }
 		.espacecentral h1 { font-size: 2rem; padding-bottom: 1rem; padding-top: 2rem; }
@@ -10,20 +14,21 @@
 		.appzencsv { padding-top: 2rem; }
 
 
-		.pagea4 { width: 190mm; height: 285mm; border: 1px solid #fafafa;
+		.pagea4 { width: 190mm; height: 285mm; 
 			box-sizing: border-box;
 			page-break-after: always;
 			margin: 0 auto;
 			xoverflow: hidden;
-			position: relative;margin-top: 5mm; border: 0.5px solid black; }
+			position: relative;margin-top: 5mm; border: 0.5px solid #FA5509; }
 		@page { xxsize: A4;  margin: 0; }
 		@media screen { .pagea4 { margin-bottom: 2rem; } }
 
 		.headnav { display: flex; flex-direction: row;
 			width: 100%; padding: .5rem; padding-left: 2rem;
-			justify-content: flex-start; align-items: flex-end; }
-		.headnav img { height: 50px; }
-		.headnav .slogan { padding-bottom: 3px; font-weight: bold; font-size: 0.9rem; }
+			justify-content: flex-start; align-items: flex-end;
+			background-image: linear-gradient(to right top, #fdd0bb, #fdb999, #faa279, #f58a59, #ef7239); xborder: 1px solid #FA5509; }
+		.headnav img { height: 80px; }
+		.headnav .slogan { padding-left: 1rem; padding-bottom: 0.6rem; font-weight: bold; font-size: 1.3rem; line-height: 1.5rem;}
 		.headnav .thematique { self-items: flex-end; padding-bottom: 3px; font-weight: bold; font-size: 0.9rem; }
 
 		header { xmargin-top: .5rem; xmargin-bottom: .5rem;	xborder: .75px solid black;	 }
@@ -39,32 +44,34 @@
 		.cadre {  width: 100%; min-height: 20rem;}
 
 		.sidearticle { margin-bottom: 2rem; }
-		.sidearticle .sidebar { width: 70mm; padding-right: .75rem;  }
+		.sidearticle .sidebar { width: 60mm; padding-right: .75rem; padding-top: 1rem; }
 		.sidearticle .sidebar p { margin-bottom: 1rem; margin-left: 2rem; line-height: 1.2rem; font-size: 0.9rem; }
-		.sidearticle .sidebar p strong { text-transform: uppercase; font-size: 0.8rem; }
-		.text-is-highlight { font-size: 1.3rem; line-height: 1.5rem; }
+		.sidearticle .sidebar p strong { text-transform: uppercase; font-size: 0.8rem;  color: #FA5509;}
+		.text-is-highlight { font-size: 1.3rem; font-weight: bold; line-height: 1.5rem; }
 
 		.sidearticle .article { padding-left: 2rem; padding-right: 3rem; }
-		.sidearticle .article h2, .sidearticle .article h1 { font-size: 0.8rem; line-height: 1rem; font-weight: bold; text-transform: uppercase; padding-top: 1rem; }
+		.sidearticle .article h2, .sidearticle .article h1 { font-size: 0.8rem; line-height: 1rem; font-weight: bold; text-transform: uppercase; padding-top: 1rem; color: #FA5509; }
+		.article h3 { font-weight: bold; }
+		.article { xborder: 1px solid black; }
 		.sidearticle .article p {  padding-bottom: .5rem;  padding-top: .3rem; line-height: 1.2rem; font-size: 0.9rem; }
 		.sidearticle .article ul { list-style-type: square; margin-left: 1.5rem; padding-top: .3rem; padding-bottom: .5rem; }
 		.sidearticle .article li { font-size: 0.9rem; line-height: 1.2rem; }
 
 		.bottomright { position: absolute; bottom: 1rem; right: 1rem; font-size: 0.8rem;text-transform: uppercase; }
+		.adrbottomright { position: absolute; bottom: 0rem; right: 0rem; padding-bottom: 1rem; padding-right: 1rem; background-image: linear-gradient(to right bottom, #fdd0bb, #fdb999, #faa279, #f58a59, #ef7239); border: 1px solid #FA5509;  }
+
 </style>
 {% include 'ui/headzen.html' %}
 
 <div class="pagea4">
 	<div class="headnav">
 		<img src="{{profile.rooturl}}{{profile.sourceurl}}{{profile.brandimage}}" alt="{{profile.brand}}" />
-		<p class="slogan tags"><span class="tag">{{brandslogan}}</span></p>
+		<p class="slogan"><span class="xtag">{{forthematique}}<br>{{brandslogan}}</span></p>
 	</div>
 
 	<div class="cadre">
 		<header>
-			<div class="surtitre">
-				FORMATION {{forthematique}}
-			</div>
+			
 			<h1>{{fortitre}}</h1>
 			<div class="description">{{fordescription|safe}}</div>
 
@@ -80,13 +87,10 @@
 						<strong>Durée :</strong><br /> <span class="text-is-highlight">{{forduree|safe}}</span>
 					</p>
 					<p>
-						<strong>Public concerné :</strong><br />{{forpublic}}
+						<strong>Public concerné :</strong><br />{{forpublic|safe}}
 					</p>
 					<p>
-						<strong>Pré-requis :</strong><br />{{forprerequis}}
-					</p>
-					<p>
-						<strong>Intervenant :</strong><br />{{forintervenant}}
+						<strong>Intervenant :</strong><br />{{forintervenant|safe}}
 					</p>
 					<p>
 						<strong>Prix :</strong><br />{{forprix}}
@@ -104,17 +108,29 @@
 	<div class="cadre">
 
 	</div>
-	<div class="bottomright">
+	<div class="adrbottomright is-clearfix">
+
+		<div class="is-pulled-right">
+			<div style="padding: .5rem">
+				<span style="font-size: 1.2rem">
+				<strong>Contactez-nous :</strong><br>
+		
+		<strong>tel : {{profile.adrtel}}</strong></span><br>
+		<strong>{{profile.adrcourriel}}</strong><br>
+		{{profile.brand}}<br>
+		{{profile.adradresse|safe}}<br>
+	
+		</small>
+		{{profile.adrweb}}<br>
+		
+		n° organisme de formation : <br>{{profile.adrorganismeformation}}<br>
+		n° siret: {{profile.adrsiret}}<br></small>
+	</div>
+		<img src="{{profile.rooturl}}{{profile.sourceurl}}{{profile.datadockimage}}" alt="{{profile.brand}}" />
+		</div>
+	</div>
+	<div class="bottomright is-clearfix">
 		Page 2
-	</div>
-</div>
-
-<div class="pagea4">
-	<div class="cadre">
-
-	</div>
-	<div class="bottomright">
-		Page 3
 	</div>
 </div>
 

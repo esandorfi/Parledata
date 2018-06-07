@@ -1,0 +1,26 @@
+{% include 'ui/headz.html' %}
+{% include 'ui/headzen.html' %}
+
+<section class="hero is-primary is-bold is-fullheight">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        Le serveur Parle Data indique un build <span style="text-transform: uppercase;">{{ build.action }}</span>.
+      </h1>
+      {% if build.noerror == False %}<div class="notification is-danger">avec erreurs !</div>{% endif %}
+      <p>
+				<strong>Résultat:</strong><br />
+				{{ build.history|safe }}
+			</p>
+    </div>
+  </div>
+</section>
+
+
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+{% include 'ui/footzen.html' %}

@@ -20,12 +20,12 @@ from pprint import pprint
 verPackage = "parledata"
 
 # parladata package
-from .log import logger, loglevel
+from parledata.log import logger, loglevel
 from .template import PlwTemplate
 from .data import PlwData
 from .scan import PlwScan
 
-import logging
+from logging import DEBUG, CRITICAL, INFO
 # GLOBAL VARIABLES
 # info
 
@@ -61,6 +61,7 @@ class PlwInit(object):
 		self.stopIfError = True
 		self.noError = True
 		self.isInit = False
+		self.history = []
 
 
 
@@ -116,6 +117,7 @@ class PlwInit(object):
 		# stop build if errors
 		self.stopIfError = True
 		self.noError = True
+		self.sharedprofile = {}
 		"""
 		# log variables
 		logger.debug("ZEN PlwInit - Input arguments")
@@ -144,8 +146,30 @@ class PlwInit(object):
 		else:
 			logger.info("--- ERROR")
 
+	def clearhistory(self):
+		del self.history
+		self.history = []
 
+	def sethistory(self, history, type = INFO):
+		if( type == DEBUG ):
+			msg = "+ "
+			logger.debug(history)
+		elif( type == CRITICAL ):
+			msg = "!!!!!!!! "
+			logger.critical(history)
+		else:
+			msg = ""
+			logger.info(history)
+		if( not self.history ):
+			self.history = []
+		self.history.append(msg+history)
 
+	def gethistory(self):
+		if( self.history ):
+			msg = '<br>'.join(self.history)
+		else:
+			msg = " build did nothing "
+		return msg
 
 	# IDX
 	def openidx(self, name):
@@ -155,22 +179,23 @@ class PlwInit(object):
 
 	# ROUTE
 	# GENERATE HTML FILE
-	def route(self, fdata, ftemplate = '', fhtml = '', isprofile = False):
+	def route(self, fdata, ftemplate = '', fhtml = '', isprofile = False, isjobending = True):
 		if self.isInit == False:
-			logger.critical("No configuration loaded")
+			self.sethistory("No configuration loaded", CRITICAL)
 			return False
 
 		if self.stopIfError is True and self.noError is False:
-			logger.critical("Previous error - skip next file : "+fhtml)
+			self.sethistory("Previous error - skip next file : "+fhtml, CRITICAL)
+
 			return False
 		if not self.myTemplate.is_valid():
-			logger.critical("PlwTemplate is not set")
+			self.sethistory("PlwTemplate is not set", CRITICAL)
 			return False
 
-		logger.info("#")
+
 		# WRITE STATIC WITH DATA AND TEMPLATE
-		if not self.myData.load_markdown(fdata, isprofile):
-			logger.critical("EMPTY DATA OR DATA WENT WRONG")
+		if not self.myData.load_markdown(fdata, isprofile, fhtml):
+			self.sethistory("EMPTY DATA OR DATA WENT WRONG", CRITICAL)
 			self.noError = False
 			return False
 		#import pdb; pdb.set_trace()
@@ -178,14 +203,20 @@ class PlwInit(object):
 			ftemplate = self.myData.template
 		if isprofile == True:
 			self.myData.profile = {}
-			logger.info("Initialize shared profile from "+fdata)
-
-		self.noError = self.myData.write(self.myData.data, ftemplate, fhtml, isprofile)
+		if isjobending == True:
+			self.noError = self.myData.write(self.myData.data, ftemplate, fhtml, isprofile)
 
 		#if( self.noError == True)
 		#	self.noError = self.myScan.addidx(self.myData.data)
 		if( self.noError == True):
-			self.noError = self.myData.ending()
+			if( isprofile == True ):
+				self.sharedprofile = self.myData.data
+				self.sethistory("Initialize shared profile from "+fdata)
+			if( isjobending == True ):
+				if( self.myData.url ):
+					self.sethistory(fdata +" + " +ftemplate +"-> "+self.myData.url[0])
+				self.noError = self.myData.ending()
+
 		return self.noError
 
 	# CHANGE DATA PATH

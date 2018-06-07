@@ -41,7 +41,7 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 	sourcefile = sourcefile.lower()
 
 	p, f = os.path.split(sourcefile)
-	#logger.debug("split p "+p+" f "+f)
+	logger.debug("split p "+p+" f "+f)
 
 	# check if sourcefile has order
 	lenspace = f.find(' ')
@@ -49,17 +49,23 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		order = f[:lenspace]
 		f = f[lenspace+1:]
 		logger.debug('order is ['+order+'], file : '+f)
-	sourcefile = p + "\\" + f
+
+	logger.info("p " +p +" f "+f +" s "+sourcefile)
+
+
 	# return url with path convention
-	if f.find('.'):
-		furl = f.split('.')[0]
+	if f.find('.') != -1:
+		furl = f.split('.')[0]+'.html'
+
 	else:
 		furl = f
 
+	sourcefile = p + "\\" if p != '' else ''
+	filename = sourcefile + furl
 
-
+	"""
 	# remove extension
-	if sourcefile.find('.'):
+	if sourcefile.find('.') != -1:
 		if sourcefile.find('.md') != -1:
 			filename = sourcefile.split('.')[0]+'.html'
 			logger.debug("find md")
@@ -67,10 +73,10 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 			filename = sourcefile
 	else:
 		filename = sourcefile+'.html'
+	"""
 
 
-
-	#logger.debug("filename is "+filename)
+	logger.info("filename is "+filename)
 
 	# remove source_path if any
 	if source_path != '':
