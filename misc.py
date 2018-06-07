@@ -87,11 +87,11 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 			filename = filename[len(source_path):]
 	## has to check
 	if os.path.exists(filename):
-		fullfilename = filename
+		fullfilename = re.sub(r"[^\w\\\\:.]", '-', filename)
 	else:
-		fullfilename = static_path+filename
+		fullfilename = static_path+re.sub(r"[^\w\\\\:.]", '-', filename)
 
-	fullfilename = re.sub(r"[^\w\\\\:.]", '-', fullfilename)
+	#fullfilename = re.sub(r"[^\w\\\\:.]", '-', fullfilename)
 	#logger.debug("static file: "+fullfilename)
 
 	path = os.path.dirname(fullfilename)

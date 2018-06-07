@@ -383,6 +383,7 @@ class PlwData(object):
 			self.profile = self.data
 			self.data = { "profile" : self.profile }
 			logger.debug("initialize profile in json data")
+			pprint(self.profile)
 			if writeJson is True:
 				self.writejson(myJsonfile)
 			return True

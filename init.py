@@ -70,6 +70,7 @@ class PlwInit(object):
 		#loglevel(fdebug)
 
 		# replace url
+
 		root_url = config['build']['root_url'].replace('\\', '/')
 		fw_url = config['build']['fw_url'].replace('\\', '/')
 		static_url = config['build']['static_url'].replace('\\', '/')
@@ -108,8 +109,8 @@ class PlwInit(object):
 		self.myData.root_url = config['build']['root_url']
 		self.myData.fw_url = config['build']['fw_url']
 		self.myData.static_url = config['build']['static_url']
-		self.myData.profile = {}
 		self.static_url = config['build']['static_url']
+		self.myData.profile = config['build'] # instead of {}
 
 		# webmaster string in jinja head
 		self.myData.webmaster = config['build']['webmaster']
@@ -117,7 +118,8 @@ class PlwInit(object):
 		# stop build if errors
 		self.stopIfError = True
 		self.noError = True
-		self.sharedprofile = {}
+		self.sharedprofile = self.myData.profile # instead of {}
+		pprint(self.sharedprofile)
 		"""
 		# log variables
 		logger.debug("ZEN PlwInit - Input arguments")
@@ -211,6 +213,7 @@ class PlwInit(object):
 		if( self.noError == True):
 			if( isprofile == True ):
 				self.sharedprofile = self.myData.data
+				pprint(self.sharedprofile)
 				self.sethistory("Initialize shared profile from "+fdata)
 			if( isjobending == True ):
 				if( self.myData.url ):
