@@ -119,7 +119,7 @@ class PlwInit(object):
 		self.stopIfError = True
 		self.noError = True
 		self.sharedprofile = self.myData.profile # instead of {}
-		pprint(self.sharedprofile)
+		#pprint(self.sharedprofile)
 		"""
 		# log variables
 		logger.debug("ZEN PlwInit - Input arguments")
@@ -213,7 +213,7 @@ class PlwInit(object):
 		if( self.noError == True):
 			if( isprofile == True ):
 				self.sharedprofile = self.myData.data
-				pprint(self.sharedprofile)
+				#pprint(self.sharedprofile)
 				self.sethistory("Initialize shared profile from "+fdata)
 			if( isjobending == True ):
 				if( self.myData.url ):

@@ -7,7 +7,7 @@ body { xbackground-color: #f8c91b;
 	      to right,
 	      #f8c91b, #f8e10f
 	    );
-			min-height: 100vh;
+
 }
 
 .title { color: #fafafa; padding-bottom: 1rem; text-shadow: 1px 1px 15px #fafafa; text-align: center;}
@@ -37,8 +37,6 @@ body { xbackground-color: #f8c91b;
 .snapshot-action a { font-size: 2rem;  color: #2B3B8E; border: 1px solid #2B3B8E; background-color: #fff;
  border-radius: 50%; width: 40px; height: 40px; padding: 10px; box-shadow: 1px 1px 5px #2B3B8E;}
 
-.snapshot-notification { padding: .8em; color: #fff; }
-.snapshot-notification strong { padding: 1em; color: #fff; font-size: 1.2rem; }
 
 .snapshot-polaroid {
 padding: 10px 10px 5px 10px;
@@ -74,7 +72,7 @@ overflow-x:hidden;
 		.display-fullscreen { flex-direction: row; }
 		.video-fullscreen .data { height: 100vh; }
 	}
-.video-fullscreen .action { position: absolute; bottom: 1rem; left: 0px; padding: 1rem; font-size: 1rem; color: #000;
+.video-fullscreen .action { position: absolute; bottom: 0px; left: 0px; padding: 0rem; font-size: 1rem; color: #000;
  visibility: inherit; display: flex; flex-direction: row; align-items: center; background-color: #f8c91b; padding-right: 1rem; }
  .video-fullscreen .action .legend { font-size: 1.5rem; color: #2B3B8E; padding-left: 1rem; line-height: 1.3rem; }
 .video-fullscreen .action a { display: inline-flex; align-items: center; justify-content: center;
@@ -93,8 +91,8 @@ overflow-x:hidden;
 
 
 
-.display-fullscreen .content-visual .visual-legend { font-size: 1.2rem; font-weight: bold;
-	background-color: #f8c91b; color: rgba(40, 40, 40, 0.5); padding: 1.5rem; display: inline-block; xwidth: 50px; }
+.display-fullscreen .content-visual .visual-legend { font-size: 1.2rem; xfont-weight: bold;
+	background-color: #f8c91b; color: #000; padding: 1.1rem; display: inline-block; xwidth: 50px; }
 
 
  .display-fullscreen .content-visual { background-color: #f8c91b; visibility: inherit;
@@ -133,7 +131,7 @@ overflow-x:hidden;
  		.display-fullscreen .content-txt { width: 100%; height: 40vh; overflow: auto; xflex: 1; padding-left: .5rem; }
 		.display-fullscreen .content-txt .txt { font-size: 1rem; }
  		.display-fullscreen .content-txt .legend { padding: 0px; }
-		.display-fullscreen .content-visual .visual-legend { position: absolute; bottom: 0rem; padding: .5rem; }
+		.display-fullscreen .content-visual .visual-legend { position: absolute; bottom: 0; padding: .5rem; }
 
 
  	}
@@ -172,7 +170,7 @@ overflow-x:hidden;
 
 
 .w500 { max-width: 500px; margin: 0 auto; }
-.h300 { height: 300px;}
+.h300 { min-height: 300px;}
 .h250 { height: 250px;}
 .h220 { height: 220px;}
 .h200 { height: 200px;}
@@ -203,7 +201,7 @@ overflow-x:hidden;
 
 @media (max-width: 768px) {
 	.contact { display: flex; position: relative; flex-direction: row;
-	height: 200px; padding: 1rem; justify-content: space-around; }
+	xheight: 200px; padding: 1rem; justify-content: space-around; }
 	.contact img {  -webkit-filter: sepia(100%);     filter: sepia(100%); box-shadow: 2px 2px 10px #fff;}
 	.round a span { visibility: visible; }
   .round .text, .round .icon {box-shadow: 2px 2px 10px #fff;	}
@@ -224,9 +222,6 @@ align-items: center; }
 
 .hidden { display: none; }
 
-#context, #context-enfant { display: none; }
-
-
 .atelier { text-align: justify; padding: 1rem; margin-bottom: 3rem; font-weight: bold;
 	background-color: rgba(248, 201, 27, 0.7); border-radius: 5px; }
 .atelier strong { font-size: 1.2rem; }
@@ -237,7 +232,6 @@ align-items: center; }
 .newsletter { padding: 1rem; }
 .newsletter .posttitle { font-size: 1.2rem; text-align: left; margin: 0; padding: 0; color: rgb(40, 40, 40, 0.5); }
 .newsletter .message { background-color: red; color: white; font-weight: normal; padding: .2rem; display: none;}
-
 </style>
 
 
@@ -250,14 +244,7 @@ align-items: center; }
 
 
 {# TITRE #}
-<div class="flex h300 center" id="context-enfant">
-		<div class="supertitle w500">
-			{{ title|safe }}
-		</div>
-</div>
-
-{# CONTEXTE TITRE #}
-<div class="flex w500 center" id="context">
+<div class="flex h300 w500 center">
 		<div class="supertitle w500">
 			<br />
 			<p style="font-size: 1.1rem">
@@ -265,7 +252,7 @@ align-items: center; }
 			</p>
 		</div>
 		<div class="atelier">
-		{{profile.atelier|safe}}<br /><br />
+		{{profile.atelier|safe}}<br />
 		{{profile.ateliersign|safe}}
 
 			<div class="newsletter">
@@ -290,7 +277,6 @@ align-items: center; }
 		</div>
 
 </div>
-
 
 {# FULLSCREEN #}
 <div class="video-fullscreen">
@@ -339,7 +325,7 @@ Erreur de Configuration - Contexte des données <br />
 <br />AUDIODIR Manquant
 {% endif %}
 
-{% if zencsv is defined %}
+{% if zencsvvideo is defined %}
 <div class="container-snapshot">
   <div class="columns is-gapless">
 
@@ -357,7 +343,7 @@ Erreur de Configuration - Contexte des données <br />
 
 			{% set countercol = ['1'] %}
 
-			{% for mydata in zencsv %}
+			{% for mydata in zencsvvideo %}
 
 				{# CLOSE PREVIOUS DIV COLUMN AND OPEN NEW ONE
 				{% if loop.index > (countercol|length)*(loop.length/1) %}
@@ -373,7 +359,7 @@ Erreur de Configuration - Contexte des données <br />
 
 				{# SNAPSHOT #}
 				{% if mydata.audio|length > 1 %}
-				 <div class="snapshot snapshot-polaroid is-audio w500 h180" id="snapshot{{ mydata.num }}" data-action="audio" data-value="{{ mydata.audio }}" data-background="{{ mydata.img }}" data-legend="{{ mydata.prenom }}" data-bgposition="{{ mydata.bgposition}}">
+				 <div class="snapshot snapshot-polaroid w500 h180" id="snapshot{{ mydata.num }}" data-action="audio" data-value="{{ mydata.audio }}" data-background="{{ mydata.img }}" data-legend="{{ mydata.prenom }}" data-bgposition="{{ mydata.bgposition}}">
 
 				    <div class="snapshot-img">
 
@@ -389,18 +375,17 @@ Erreur de Configuration - Contexte des données <br />
 					{# END SNAPSHOT #}
 				{% endif %}
 
-				{% if novideo != '1' %}
 					<br />
 					{# VIDEO #}
 					{% if mydata.video is not none %}
 
-					<div class="snapshot snapshot-polaroid is-video w500 h220" id="video{{ mydata.num }}" data-action="video" data-value="{{ mydata.video }}" data-legend="{{ mydata.videolegend }}" style="background-image: url('http://img.youtube.com/vi/{{ mydata.video }}/0.jpg'); background-size: cover; background-position: center;">
+					<div class="snapshot snapshot-polaroid sepia w500 h220" id="video{{ mydata.num }}" data-action="video" data-value="{{ mydata.video }}" data-legend="#{{ loop.index }} - {{ mydata.videolegend }}" style="background-image: url('http://img.youtube.com/vi/{{ mydata.video }}/0.jpg'); background-size: cover; background-position: center;">
 			<!--
 						<div class="snapshot-img snapshot-imgyb" style="background: url('http://img.youtube.com/vi/{{ mydata.video }}/0.jpg') no-repeat cover center center;">
 							<img src="http://img.youtube.com/vi/{{ mydata.video }}/0.jpg">
 						</div>
 			-->
-						<div class="snapshot-legend-v {%if mydata.audio|length > 1 %}snapshot-legendyb{%endif%}">{{ mydata.videolegend|safe }}</div>
+						<div class="snapshot-legend-v {%if mydata.audio|length > 1 %}snapshot-legendyb{%endif%}">#{{ loop.index }} - {{ mydata.videolegend|safe }}</div>
 						<div class="snapshot-action"><a href="#"><i class="fab fa-youtube"></i></a></div>
 
 					</div>
@@ -408,15 +393,9 @@ Erreur de Configuration - Contexte des données <br />
 					<div style="height: 5rem;">&nbsp;
 					</div>
 
+					{%endif%}
 					{% endif %}
-					{% else %}
-					<div class="snapshot snapshot-polaroid w500 h220 sepia" >
-							<div class="snapshot-notification">
-								{{ profile.notification|replace('@name', mydata.prenom)|safe }}
-							</div>
-					</div>
-					{% endif %}
-				{% endif %}
+
 
 				</div>
 				{#END USER#}
@@ -434,27 +413,18 @@ Erreur de Configuration - Contexte des données <br />
 
 
 {# ACTION #}
-<div class="contact xsepia">
+<div class="contact sepia">
+
+
 
 	<div class="round postop">
-
-		<a href="{% if 'audio-classe' in url %}{{url}}{%else%}{{ url|replace("-audio","-audio-classe") }}{%endif%}.html" id="action-enfant"><div class="text">mon enfant</div><span>voir mon enfant</span></a>
+		<a href="{{ url }}.html" id="action-allvideo"><div class="text">vidéo</div><span>voir toute les vidéos</span></a>
 	</div>
-
 	<div class="round postop">
-
-		<a href="{% if 'audio-classe' in url %}{{url}}{%else%}{{ url|replace("-audio","-audio-classe") }}{%endif%}.html"><div class="text">sa classe</div><span>voir toute la {{ classemini }}</span></a>
+		<a href="{{ url|replace("-allvideo","") }}.html"><div class="text">{{ classemini }}</div><span>voir toute la classe</span></a>
 	</div>
-	{#
-{% if novideo != '1' %}
-	<div class="round postop">
-		<a href="{{ url|replace("-audio-classe","-audio") }}-allvideo.html" id="action-allvideo"><div class="text">vidéo danse</div><span>voir toute les vidéos</span></a>
-	</div>
-{% endif %}
-	#}
-
 	<div class="round on">
-		<a href="mailto:parlewebpro@gmail.com?subject=EAC Emotion avec Emmanuel Sandorfi à Sancta Maria" id="action-message"><div class="text">msg à emmanuel</div><span>laissez un message à Emmanuel</span></a>
+		<a href="mailto:parlewebpro@gmail.com?subject=EAC Emotion avec Emmanuel Sandorfi à Sancta Maria" id="action-message"><div class="text">contact</div><span>laissez un message à Emmanuel</span></a>
 	</div>
 
 	{#
@@ -490,19 +460,12 @@ var url = window.location.href;
 var userid = '';
 var arguments = url.split('?').pop().split('id=').pop();
 if( arguments != url ) {
-	$( "#context-enfant" ).css("display", "block");
 	$( "#user"+arguments ).css("display", "block");
 	userid = arguments;
 	console.log("#user"+userid);
 	$(" #sid ").html(userid);
 }
-else {
-
-
-	$( ".user" ).css("display", "block");
-	$( "#context" ).css("display", "block");
-	$( ".is-audio").addClass("sepia");
-}
+else { $( ".user" ).css("display", "block"); }
 
 
 
@@ -563,7 +526,7 @@ else if( action == 'video' )
 {
 	value_legend = $( this ).attr( "data-legend" );
 	html_legend = value_legend;
-
+	console.log('video '+value_legend+' '+value);
 	html = "<div class='vid-container'><iframe id='ytplayer' type='text/html' width='900px' height='600px' src='https://www.youtube.com/embed/"+value+"?autoplay=1&controls=1&rel=0&showinfo=0' frameborder='0' allowfullscreen></div>";
 
 	console.log(html_legend);
@@ -574,7 +537,7 @@ else if( action == 'video' )
 
 
 }
-
+else alert('no action defined');
 });
 
 
@@ -606,6 +569,33 @@ $( ".display-fullscreen .content-txt .txt, .display-fullscreen .content-visual, 
 	return false;
 });
 
+
+
+$("#action-allclasse")
+.click(function(){
+
+	var sid = $("#sid").text();
+	console.log('all classe userid '+userid);
+	console.log('all classe sid '+sid);
+
+	$( ".user" ).css("display", "block");
+	$("html, body").animate({ scrollTop: 0 }, "slow");
+	/* window.location = $(this).attr('href')+"?sid="+userid; */
+	return false;
+
+});
+
+
+$("#action-info")
+.click(function(){
+
+	$( ".info-fullscreen" ).css( "display", "flex" );
+	$(".contact").css("visibility", "hidden");
+	return false;
+
+});
+
+
 function readCookie(name) {
     var nameEQ = encodeURIComponent(name) + "=";
     var ca = document.cookie.split(';');
@@ -628,41 +618,6 @@ $("#action-message")
 	return false;
 
 });
-
-$("#action-enfant")
-.click(function(){
-
-	var cookclasse = readCookie('eacemotionclasse');
-	var cookenfant = readCookie('eacemotionid');
-	window.location = $(this).attr('href')+"?id="+cookenfant;
-	return false;
-
-});
-
-$("#action-allclasse")
-.click(function(){
-
-	var sid = $("#sid").text();
-	/*console.log('all classe userid '+userid);
-	console.log('all classe sid '+sid);*/
-
-	$( ".user" ).css("display", "block");
-	$("html, body").animate({ scrollTop: 0 }, "slow");
-	/* window.location = $(this).attr('href')+"?sid="+userid; */
-	return false;
-
-});
-
-
-$("#action-info")
-.click(function(){
-
-	$( ".info-fullscreen" ).css( "display", "flex" );
-	$(".contact").css("visibility", "hidden");
-	return false;
-
-});
-
 
 $('#form-newsletter').bind('submit', function (event) {
 	console.log('submit');
@@ -697,7 +652,6 @@ $('#form-newsletter').bind('submit', function (event) {
 		}
 	});
 });
-
 
 </script>
 

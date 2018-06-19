@@ -37,8 +37,6 @@ body { xbackground-color: #f8c91b;
 .snapshot-action a { font-size: 2rem;  color: #2B3B8E; border: 1px solid #2B3B8E; background-color: #fff;
  border-radius: 50%; width: 40px; height: 40px; padding: 10px; box-shadow: 1px 1px 5px #2B3B8E;}
 
-.snapshot-notification { padding: .8em; color: #fff; }
-.snapshot-notification strong { padding: 1em; color: #fff; font-size: 1.2rem; }
 
 .snapshot-polaroid {
 padding: 10px 10px 5px 10px;
@@ -224,19 +222,7 @@ align-items: center; }
 
 .hidden { display: none; }
 
-#context, #context-enfant { display: none; }
 
-
-.atelier { text-align: justify; padding: 1rem; margin-bottom: 3rem; font-weight: bold;
-	background-color: rgba(248, 201, 27, 0.7); border-radius: 5px; }
-.atelier strong { font-size: 1.2rem; }
-.atelier em { font-weight: normal; font-size: 1.1rem; }
-
-.on .text { opacity: 1; background-color: #fff; }
-
-.newsletter { padding: 1rem; }
-.newsletter .posttitle { font-size: 1.2rem; text-align: left; margin: 0; padding: 0; color: rgb(40, 40, 40, 0.5); }
-.newsletter .message { background-color: red; color: white; font-weight: normal; padding: .2rem; display: none;}
 
 </style>
 
@@ -250,47 +236,11 @@ align-items: center; }
 
 
 {# TITRE #}
-<div class="flex h300 center" id="context-enfant">
+<div class="flex h300 center">
 		<div class="supertitle w500">
 			{{ title|safe }}
 		</div>
 </div>
-
-{# CONTEXTE TITRE #}
-<div class="flex w500 center" id="context">
-		<div class="supertitle w500">
-			<br />
-			<p style="font-size: 1.1rem">
-				{{ classe|safe }}
-			</p>
-		</div>
-		<div class="atelier">
-		{{profile.atelier|safe}}<br /><br />
-		{{profile.ateliersign|safe}}
-
-			<div class="newsletter">
-				<form action="{{profile.rooturl}}{{profile.postnewsletter}}" method="POST" accept-charset="utf-8" id="form-newsletter">
-					<div class="posttitle" id="form-newsletter-title">{{profile.postnewslettertitle|safe}}</div>
-					<div class="field is-grouped" id="form-newsletter-input">
-						<div class="control has-icons-left is-expanded">
-								<input type="email" value="" name="email" class="input is-flat required email" placeholder="votre courriel" required id="form-newsletter-courriel">
-								<span class="icon is-small is-left"><i class="fas fa-envelope"></i></span>
-						</div>
-						<div class="control">
-								<input type="hidden" name="source" value="eac emotion 2018">
-								<input type="hidden" name="classe" value="" id="input_classe">
-								<input type="hidden" name="enfant" value="" id="input_id">
-								<button type="submit" name="submit-newsletter" id="submit-newsletter" class="button is-primary"><i class="fas fa-check"></i></button>
-						</div>
-						<div class="message">
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-
-</div>
-
 
 {# FULLSCREEN #}
 <div class="video-fullscreen">
@@ -373,7 +323,7 @@ Erreur de Configuration - Contexte des données <br />
 
 				{# SNAPSHOT #}
 				{% if mydata.audio|length > 1 %}
-				 <div class="snapshot snapshot-polaroid is-audio w500 h180" id="snapshot{{ mydata.num }}" data-action="audio" data-value="{{ mydata.audio }}" data-background="{{ mydata.img }}" data-legend="{{ mydata.prenom }}" data-bgposition="{{ mydata.bgposition}}">
+				 <div class="snapshot snapshot-polaroid w500 h180" id="snapshot{{ mydata.num }}" data-action="audio" data-value="{{ mydata.audio }}" data-background="{{ mydata.img }}" data-legend="{{ mydata.prenom }}" data-bgposition="{{ mydata.bgposition}}">
 
 				    <div class="snapshot-img">
 
@@ -389,34 +339,6 @@ Erreur de Configuration - Contexte des données <br />
 					{# END SNAPSHOT #}
 				{% endif %}
 
-				{% if novideo != '1' %}
-					<br />
-					{# VIDEO #}
-					{% if mydata.video is not none %}
-
-					<div class="snapshot snapshot-polaroid is-video w500 h220" id="video{{ mydata.num }}" data-action="video" data-value="{{ mydata.video }}" data-legend="{{ mydata.videolegend }}" style="background-image: url('http://img.youtube.com/vi/{{ mydata.video }}/0.jpg'); background-size: cover; background-position: center;">
-			<!--
-						<div class="snapshot-img snapshot-imgyb" style="background: url('http://img.youtube.com/vi/{{ mydata.video }}/0.jpg') no-repeat cover center center;">
-							<img src="http://img.youtube.com/vi/{{ mydata.video }}/0.jpg">
-						</div>
-			-->
-						<div class="snapshot-legend-v {%if mydata.audio|length > 1 %}snapshot-legendyb{%endif%}">{{ mydata.videolegend|safe }}</div>
-						<div class="snapshot-action"><a href="#"><i class="fab fa-youtube"></i></a></div>
-
-					</div>
-					{% if mydata.audio|length < 1 %}
-					<div style="height: 5rem;">&nbsp;
-					</div>
-
-					{% endif %}
-					{% else %}
-					<div class="snapshot snapshot-polaroid w500 h220 sepia" >
-							<div class="snapshot-notification">
-								{{ profile.notification|replace('@name', mydata.prenom)|safe }}
-							</div>
-					</div>
-					{% endif %}
-				{% endif %}
 
 				</div>
 				{#END USER#}
@@ -434,27 +356,18 @@ Erreur de Configuration - Contexte des données <br />
 
 
 {# ACTION #}
-<div class="contact xsepia">
+<div class="contact sepia">
+
+
 
 	<div class="round postop">
-
-		<a href="{% if 'audio-classe' in url %}{{url}}{%else%}{{ url|replace("-audio","-audio-classe") }}{%endif%}.html" id="action-enfant"><div class="text">mon enfant</div><span>voir mon enfant</span></a>
+		<a href="{{ url }}-allvideo.html" id="action-allvideo"><div class="text">vidéo</div><span>voir toute les vidéos</span></a>
 	</div>
-
 	<div class="round postop">
-
-		<a href="{% if 'audio-classe' in url %}{{url}}{%else%}{{ url|replace("-audio","-audio-classe") }}{%endif%}.html"><div class="text">sa classe</div><span>voir toute la {{ classemini }}</span></a>
+		<a href="{{ url|replace("-allvideo","") }}.html"><div class="text">{{ classemini }}</div><span>voir toute la classe</span></a>
 	</div>
-	{#
-{% if novideo != '1' %}
-	<div class="round postop">
-		<a href="{{ url|replace("-audio-classe","-audio") }}-allvideo.html" id="action-allvideo"><div class="text">vidéo danse</div><span>voir toute les vidéos</span></a>
-	</div>
-{% endif %}
-	#}
-
 	<div class="round on">
-		<a href="mailto:parlewebpro@gmail.com?subject=EAC Emotion avec Emmanuel Sandorfi à Sancta Maria" id="action-message"><div class="text">msg à emmanuel</div><span>laissez un message à Emmanuel</span></a>
+		<a href="mailto:parlewebpro@gmail.com?subject=EAC Emotion avec Emmanuel Sandorfi à Sancta Maria" id="action-message"><div class="text">contact</div><span>laissez un message à Emmanuel</span></a>
 	</div>
 
 	{#
@@ -490,19 +403,12 @@ var url = window.location.href;
 var userid = '';
 var arguments = url.split('?').pop().split('id=').pop();
 if( arguments != url ) {
-	$( "#context-enfant" ).css("display", "block");
 	$( "#user"+arguments ).css("display", "block");
 	userid = arguments;
 	console.log("#user"+userid);
 	$(" #sid ").html(userid);
 }
-else {
-
-
-	$( ".user" ).css("display", "block");
-	$( "#context" ).css("display", "block");
-	$( ".is-audio").addClass("sepia");
-}
+else { $( ".user" ).css("display", "block"); }
 
 
 
@@ -574,7 +480,7 @@ else if( action == 'video' )
 
 
 }
-
+else alert('no action defined');
 });
 
 
@@ -629,15 +535,7 @@ $("#action-message")
 
 });
 
-$("#action-enfant")
-.click(function(){
 
-	var cookclasse = readCookie('eacemotionclasse');
-	var cookenfant = readCookie('eacemotionid');
-	window.location = $(this).attr('href')+"?id="+cookenfant;
-	return false;
-
-});
 
 $("#action-allclasse")
 .click(function(){
@@ -662,42 +560,6 @@ $("#action-info")
 	return false;
 
 });
-
-
-$('#form-newsletter').bind('submit', function (event) {
-	console.log('submit');
-	$("input[id=input_classe]").val(readCookie('eacemotionclasse'));
-	$("input[id=input_id]").val(readCookie('eacemotionid'));
-	event.preventDefault();
-	$.ajax({
-		type: 'POST',
-		url: '{{profile.rooturl}}{{profile.postnewsletter}}',
-		data: $('#form-newsletter').serialize(),
-		beforeSend: function() {
-			console.log('before');
-			$('#submit-newsletter').attr('disabled', true);
-		},
-		complete: function() {
-			console.log('complete');
-			$('#submit-newsletter').attr('disabled', false);
-		},
-		success: function (data) {
-			console.log('success');
-			if( data == 'OK' )
-			{
-				$('#form-newsletter-title').html('Merci.');
-				$('#form-newsletter-input').hide();
-			}
-			else {
-
-				$('#form-newsletter .message').html('Erreur');
-				$('#form-newsletter .message').show();
-			}
-			/*$('.newsletter').hide();*/
-		}
-	});
-});
-
 
 </script>
 

@@ -1,0 +1,74 @@
+{% include 'ui/headz.html' %}
+<style>
+		.bg { background: rgb(43, 59, 142); margin: 0; padding: 0; width: 100%; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; }
+		.espacecentral { height: 80vh; }
+		.espacecentral .title { padding-bottom: 1rem; }
+		.espacecentral .subtitle span { font-size: 1rem; }
+		.has-text-left { text-align: left; color: white; padding: 1rem; }
+
+		.my { max-width: 350px; padding-top: 3rem; color: #fff; height: 100%;
+			flex-direction: column; xflex-grow: 2; display: inline-flex; justify-content: center; align-self: center;}
+			.my h1 { font-size: 1.7rem; font-size: 1.2rem; }
+
+		.my-ym { align-items: flex-end; height: 80vh;}
+		.my-ym strong { color: #fff; font-size: 1.1rem; }
+		.yy {padding: 1rem;}
+</style>
+{% include 'ui/headzen.html' %}
+
+
+{#
+{% include 'ui/nav-top.html' %}
+#}
+{# MAIN SCREEN #}
+<div class="bg">
+
+
+		<div class="espacecentral">
+			<div class="container">
+				<div class="columns yy">
+					<div class="column my has-text-centered">
+						<img src="{{profile.rooturl}}{{sourceurl}}{{landingimage}}" alt="{{pagetitle}}" /><br />
+						<h1>l'expertise du digital culturel avec emmanuel sandorfi à avignon</h1>
+
+					</div>
+					<div class="column" style="padding: 2rem;">
+						<div class="my-ym" style="text-align: right; color: rgb(200, 200, 200); xborder: 1px solid white; background-image: url('emmanuel-sandorfi.png'); background-size: contain; background-repeat: no-repeat;">
+							<strong>développement web</strong> python django et javascript<br /><br /><strong>formation professionnelle</strong> <br />diffuser une programmation culturelle<br /> avec Parle data<br /><br />
+							<strong>sur mesure</strong> audit, conseil, expérience utilisateur
+						</div>
+					</div>
+
+				</div>
+
+
+			</div>
+		</div>
+
+{# SEPARATOR #}
+{#
+		<div class="hero is-medium">
+			<div class="container">
+				{% include 'ui/zencsvfromcontent.html' %}
+			</div>
+		</div>
+#}
+{% include 'ui/nav-bottom.html' %}
+
+</div>
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-111601816-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-111601816-1');
+</script>
+
+{% include 'ui/footzen.html' %}

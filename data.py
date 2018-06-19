@@ -105,7 +105,7 @@ class PlwData(object):
 		self.idx[metakey] = buf
 		self.idxcount += 1
 		logger.debug("yaml dump [%s] %d:" %(metakey, self.idxcount))
-		pprint(self.idx[metakey])
+		#pprint(self.idx[metakey])
 		return True
 
 
@@ -383,7 +383,7 @@ class PlwData(object):
 			self.profile = self.data
 			self.data = { "profile" : self.profile }
 			logger.debug("initialize profile in json data")
-			pprint(self.profile)
+			#pprint(self.profile)
 			if writeJson is True:
 				self.writejson(myJsonfile)
 			return True

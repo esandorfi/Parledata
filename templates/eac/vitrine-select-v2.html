@@ -1,0 +1,431 @@
+{% include 'ui/headz.html' %}
+<style>
+
+
+
+
+.texthead { text-align: center; font-size: 1.2rem; line-height: 1.2rem; padding: 1rem;
+	 font-weight: bold; color: #000; opacity: 0.8; background-color: #f8c91b; }
+.texthead2 { font-weight: bold; text-align: center; font-size: 1.5rem; line-height: 1.5rem; padding: 1rem;
+		color: #fff; background-color: #2B3B8E; }
+.textfoot { text-align: center; font-size: 1.1rem; padding: 1rem;
+		opacity: 1; line-height: 1.1rem; background-color: #f8c91b; #fafafa; }
+.listdata-head { font-size: 1.4rem; font-weight: bold; line-height: 1.4rem; padding-bottom: .5rem; text-align: center;}
+.listdata-head span { display: inline-block; }
+.listdata { text-align: center;}
+.card-button:hover { background-color: #2B3B8E; color: #fff; border: 1px solid #fff; cursor:pointer; box-shadow: 2px 2px 20px #fff; }
+
+.hero { background-color: #f8c91b; }
+
+body { background-color: #fafafa; }
+#classe_select { padding-top: 1rem; padding-bottom: 1rem; xbackground-color: #f8c91b; }
+
+.bg { background-color: #f8c91b;
+		clear: both;
+	  background-image: url('{{profile.rooturl}}{{bgvitrine}}');
+
+			 background-repeat: no-repeat;
+			 background-size: cover;
+			 cbackground-position: right bottom;
+
+ background-attachment: fixed;
+
+}
+
+.bgfull { xbackground-color: #f8c91b;
+		clear: both;
+	  xxbackground-image: url('{{profile.rooturl}}{{bgvitrine}}');
+
+			 background-repeat: no-repeat; background-size: cover; cbackground-position: right bottom;
+			 width: 100%; height: 300px;
+ background-attachment: fixed;
+ position: relative;
+}
+
+.bgfull .xbrand { font-weight: bold; position: absolute; bottom: .5rem; left: 3rem; text-shadow: 1px 1px 30px #fff; max-width: 400px; }
+.bgfull .content { position: absolute; top: 3rem; left: 3rem; }
+.bgfull h1 {  font-size: 4rem; line-height: 3rem; text-shadow: 1px 1px 30px #fff;}
+.bgfull .content-p { margin-top: 0rem; max-width: 800px; line-height: 1.3rem; text-shadow: 5px 5px 30px #fff; }
+.bgfull a { color: rgba(10, 10, 10, 8); text-decoration: none; }
+.bgfull h2 { font-size: 1.5rem; line-height: 1.5rem; margin: 0; padding: 0; padding-bottom: .5rem; font-weight: bold; }
+
+@media (max-width: 768px) {
+	.bgfull .content, .bgfull .brand  {left: 1rem; padding-right: 1rem; }
+	.bgfull h1 { font-size: 3.2rem; }
+
+}
+
+.user { margin-bottom: 2rem; display: none; }
+.user-radio { display: flex; align-items: flex-start; justify-content: center; flex-wrap: 1;
+	flex-direction: column; xbackground-color: #fafafa;
+font-size: 1.3rem; margin: 0rem auto; xmax-width: 800px; clear: both; }
+.label-radio-grid { clear: both; margin-left: 1rem; margin-bottom: 1rem; xbackground-color: #fafafa; }
+
+.label-radio { width: 150px; font-size: 1.3rem;  padding: .5rem; float: left; background-color: #fafafa;}
+.label-radio > input + img{ /* IMAGE STYLES */
+  cursor:pointer;
+  border:1px solid transparent;
+	border-radius: 2px;
+}
+.label-radio > input:checked + img{ /* (RADIO CHECKED) IMAGE STYLES */
+  border:1px solid #f8c91b;
+	box-shadow: 2px 2px 10px #f8c91b;
+}
+
+
+.label-card {  margin-bottom: 1rem; margin-right: .5rem; display: inline-block; }
+.label-card:last-child { margin-right: 0px; }
+.label-card span {
+	display: inline-block;
+	xborder: 1px solid #000;
+	background-color: #fafafa;
+	border-radius: 5px;
+	padding: 2rem;
+	line-height: 1.5rem;
+	font-size: 1.6rem;
+	width: 300px;
+		box-shadow: 2px 2px 2px #fff;
+	 	}
+.label-card span i { font-size: 1.1rem; text-decoration: none; font-weight: bold; }
+.label-card > input + span{ /* IMAGE STYLES */
+  cursor:pointer;
+
+}
+.label-card > input { visibility: hidden; }
+.label-card > input:checked + span{ /* (RADIO CHECKED) IMAGE STYLES */
+  border:1px solid #fff;
+	box-shadow: 2px 2px 10px #fff;
+	background-color: #2B3B8E;
+	color: #fff;
+	transition: 0.5s;
+}
+
+.brand-foot { clear: both;  padding: .5rem; padding-left: 40px; xfont-weight: bold; background-color: #f8c91b;}
+
+.img-tiny { width: 140px; height: auto; }
+@media (min-width: 800px) {
+	.label-radio { width: 300px; }
+	.img-tiny { width: 100%;  }
+}
+.question { margin-left: 25px; padding-right: 1rem; width: 100%; font-size: 1.1rem; font-weight: bold;
+	color: #2B3B8E; line-height: 1rem; display: flex; justify-content: flex-start; align-items: center; padding: 1rem;}
+
+
+#get_courriel { max-width: 600px; padding-bottom: 2rem; color: #2B3B8E; padding-right: 1rem;}
+#classe_ms, #classe_msgs, #classe_gs { display: none; }
+
+
+.bgfooter { background-color: rgba(240, 240, 240, 0.8); display: flex; flex-direction: columns; width: 100%; padding: 2rem;
+align-items: center; }
+.bgfooter .brand { padding-right: 2rem; }
+.bgfooter .brand img { width: 100px; height: auto; }
+.bgfooter .content { line-height: 1.2rem; }
+.bgfooter .content a { color: rgba(10, 10, 10, 8); text-decoration: underline; }
+.bgfooter .content em { font-size: 0.7rem; }
+
+.margin30 { padding-left: 50px; padding-right: 20px; }
+
+.number { xfont-size: 1.1rem; background-color: #fff; color: #2B3B8E; xborder: 1px solid #2B3B8E; border-radius: 50%; width: 40px; height: 40px;}
+#is_parent { font-size: 1rem; }
+.label, .checkbox { color: #2B3B8E; font-size: 1rem; font-weight: bold; }
+
+#classe_select { z-index: 1000; position: relative;}
+
+.usage { font-size: 1rem; line-height: 1rem; padding-bottom: .5rem;}
+
+@media (max-width: 768px) {
+	.bg { background-size: auto; }
+	.label-card {
+	font-size: 1.2rem;
+	width: 260px;
+	padding: 0rem;
+	margin-bottom: .5rem;
+margin-right: 0rem;
+  }
+	.label-card span { padding: .5rem;}
+}
+
+.w500left { max-width: 500px; justify-content: flex-start; margin-left: 0; }
+
+</style>
+
+
+
+
+{% include 'ui/headzen.html' %}
+
+<div class="bg">
+
+
+
+{# ENTETE #}
+<div class="bgfull">
+	<div class="content">
+		<h1>{{ texthead2|safe }}</h1>
+		<div class="content-p">
+			{{ textfoot|safe }}
+		</div>
+
+	</div>
+</div>
+
+
+
+
+{# SELECTION DES CLASSES #}
+<div class="user-radio w500left" id="classe_select">
+		<div class="question">
+			Dans quelle classe est votre enfant ?
+		</div>
+		<div class="label-radio-grid">
+		  <label class="label-card">
+		    <input type="radio" name="classe_select" value="ms">
+		    <span>Classe de <br />Mme Justine Grandjean <br /><i>Moyenne section</i></span>
+		  </label>
+			<label  class="label-card">
+		    <input type="radio" name="classe_select" value="msgs">
+		    <span>Classe de <br />Mme Rachel Cadot <br /><i>Moyenne et Grande section</i></span>
+		  </label>
+			<label  class="label-card">
+		    <input type="radio" name="classe_select" value="gs">
+		    <span>Classe de <br />Mme Natascha Beraud <br /><i>Grande section</i></span>
+		  </label>
+		</div>
+
+
+
+
+			</div>
+
+</div>
+{# FIN SELECTION DES CLASSES #}
+
+</div>
+
+
+
+{# CLASSE MS #}
+<div class="user-radio" id="classe_ms">
+		<div class="question">
+Classe de Mme Grandjean - Quel est son prénom ?
+		</div>
+		<div class="label-radio-grid">
+		{% for mydata in zencsv_ms %}
+		<label class="label-radio">
+	    <input type="radio" name="classe_ms_id" value="{{ mydata.num }}">
+	    {{ mydata.prenom }}
+			<img src="{{ profile.staticurl }}classe-ms/th-{{mydata.img}}.jpg" class="img-tiny" />
+	  </label>
+		{% endfor %}
+	  <label class="label-radio">
+	    <input type="radio" name="classe_ms_id" value="9999">
+	    ou voir la classe entiere
+	  </label>
+		</div>
+</div>
+{# FIN CLASSE MS #}
+
+{# CLASSE MS-GS #}
+<div class="user-radio" id="classe_msgs">
+		<div class="question">
+	Classe de Mme Cadot - Quel est son prénom ?
+		</div>
+		<div class="label-radio-grid">
+		{% for mydata in zencsv_msgs %}
+		{%if mydata.prenom %}
+		<label class="label-radio">
+	    <input type="radio" name="classe_msgs_id" value="{{ mydata.num }}">
+	    {{ mydata.prenom }}
+			<img src="{{ profile.staticurl }}classe-msgs/th-{{mydata.img}}.jpg" class="img-tiny" />
+	  </label>
+		{%endif%}
+		{% endfor %}
+	  <label class="label-radio">
+	    <input type="radio" name="classe_msgs_id" value="9999">
+	    ou voir la classe entiere
+	  </label>
+		</div>
+</div>
+{# FIN CLASSE MS-GS #}
+
+{# CLASSE GS #}
+<div class="user-radio" id="classe_gs">
+		<div class="question">
+			Classe de Mme Beraud - Quel est son prénom ?
+		</div>
+		<div class="label-radio-grid">
+		{% for mydata in zencsv_gs %}
+		<label class="label-radio">
+	    <input type="radio" name="classe_gs_id" value="{{ mydata.num }}">
+	    {{ mydata.prenom }}
+			<img src="{{ profile.staticurl }}classe-gs/th-{{mydata.img}}.jpg" class="img-tiny" />
+	  </label>
+		{% endfor %}
+		{#
+	  <label class="label-radio">
+	    <input type="radio" name="classe_gs_id" value="9999">
+	    ou voir la classe entiere
+	  </label>
+		#}
+		</div>
+</div>
+{# FIN CLASSE GS #}
+
+{# USAGE #}
+<div class="brand-foot">
+	{{ texthead|safe }}<br /><br />
+	<div class="usage">
+	{{ usage|safe }}
+	</div>
+
+</div>
+
+
+{# FOOTER #}
+<div class="bgfooter">
+	<div class="brand">
+		<a href="{{ plwurl }}" target="_blank"><img src="{{ profile.staticurl }}{{ plwimg }}" class="img-tiny" alt="{{ plwbrand }}" /></a>
+	</div>
+	<div class="content">
+		{{ txtbrand|safe }}<br />
+		<em>{{ majbrand }}</em>
+	</div>
+</div>
+
+
+
+{% include 'ui/footz.html' %}
+{% if debug is defined %}
+{% include 'ui/js-debug.html' %}
+{% endif %}
+
+<script>
+function createCookie(name, value, days) {
+    var expires;
+
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toGMTString();
+    } else {
+        expires = "";
+    }
+    document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = encodeURIComponent(name) + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ')
+            c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0)
+            return decodeURIComponent(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name, "", -1);
+}
+
+
+
+
+$('input[type="radio"]').prop('checked', false);
+$(" #classe_select ")
+.click(function() {
+	var selectedVal = "";
+	var selected = $("input[type='radio'][name='classe_select']:checked");
+	if (selected.length > 0) {
+	    selectedVal = selected.val();
+			/*alert(selectedVal);*/
+			$(".bgfull").css("height", "160px");
+			$(".bgfull .brand").css("visibility", "hidden");
+			$(".bgfull .content-p").css("visibility", "hidden");
+
+			$("#classe_gs").hide();
+			$("#classe_ms").hide();
+			$("#classe_msgs").hide();
+			$("#classe_"+selectedVal).show();
+			$("#classe_select").removeClass("w500left");
+			createCookie('eacemotionclasse', selectedVal, 60);
+	}
+
+});
+
+
+
+$( 'input[name="classe_gs_id"]:radio' ).on('change click', function(e) {
+
+	if( $(this).val() == '9999' ) {
+		eraseCookie('eacemotionid');
+		var url = window.location+"classe-gs-audio-classe.html";
+	}
+	else {
+		 createCookie('eacemotionid', $(this).val(), 60);
+		 var url = window.location+"classe-gs-audio.html?id="+$(this).val();
+	 }
+		 window.location = url;
+
+     return false;
+});
+
+$( 'input[name="classe_msgs_id"]:radio' ).on('change click', function(e) {
+
+	if( $(this).val() == '9999' ) {
+		eraseCookie('eacemotionid');
+		var url = window.location+"classe-msgs-audio-classe.html";
+	}
+	else {
+		createCookie('eacemotionid', $(this).val(), 60);
+		 var url = window.location+"classe-msgs-audio.html?id="+$(this).val();
+	 }
+		 window.location = url;
+
+     return false;
+});
+
+$( 'input[name="classe_ms_id"]:radio' ).on('change click', function(e) {
+
+		if( $(this).val() == '9999' ) {
+			eraseCookie('eacemotionid');
+			var url = window.location+"classe-ms-audio-classe.html";
+		}
+		else {
+			createCookie('eacemotionid', $(this).val(), 60);
+			var url = window.location+"classe-ms-audio.html?id="+$(this).val();
+		}
+
+		 window.location = url;
+     return false;
+});
+
+
+
+/*
+$( ".card-button" )
+
+.click(function() {
+	url = $( this ).attr( "data-target" );
+
+	window.location = url;
+	return false;
+});
+*/
+
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-111601816-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-111601816-1');
+</script>
+
+
+{% include 'ui/footzen.html' %}
