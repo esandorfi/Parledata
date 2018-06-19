@@ -6,6 +6,8 @@ parleweb.fr
 parleweb@gmail.com
 Avignon, France
 
+License : GNU GENERAL PUBLIC LICENSE
+
 
 ## l'efficacité par le développement
 
@@ -30,6 +32,3 @@ MVC (concept) + Python (langage)
 - référencement
 - maquette ou production
 - expérience utilisateur
-
-
-## License 2018 tous droits réservés
