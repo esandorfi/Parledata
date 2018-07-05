@@ -34,6 +34,7 @@ class PlwData(object):
 		self.static_path = objcfg.static_path
 		self.jobending = []
 		self.activedatafile = ''
+		self.activedatadir = ''
 
 	# LOAD
 	#	data from argument
@@ -83,7 +84,11 @@ class PlwData(object):
 	def load_yaml(self, metakey, fdata):
 		datafile = fdata
 		if not os.path.exists(datafile):
-			datafile = self.source_pathdata+fdata
+			if( self.source_pathdata != '' ):
+				if( self.source_pathdata[-1] != '\\' ):
+					datafile = self.source_pathdata+'\\'+fdata
+				else:
+					datafile = self.source_pathdata+fdata
 			if not os.path.exists(datafile):
 				datafile = self.static_path+fdata
 				if not os.path.exists(datafile):
@@ -188,8 +193,11 @@ class PlwData(object):
 				return False
 
 		elif keyname[:11] == 'zentemplate' or keyname[:10] == 'zengabarit':
-			self.template = keydata
-			logger.debug("%s: %s" % (keyname, keydata))
+			if( self.template != '' ):
+				logger.info("--- TEMPLATE FORCE %s" % (self.template))
+			else:
+				logger.info("--- TEMPLATE %s: %s" % (keyname, keydata))
+				self.template = keydata
 
 		return True
 
@@ -208,15 +216,18 @@ class PlwData(object):
 
 	# LOAD_MARKDOWN
 	#	data from markdown file
-	def load_markdown(self, fdata, isprofile = False, otherfilename = ''):
+	def load_markdown(self, fdata, isprofile = False, otherfilename = '', ftemplate = ''):
 		# reinitialize empty template for data
-		self.template = ''
+		self.template = ftemplate
 		del self.jobending[:] # clear jobending list (used in zenscan @build option)
 		self.activedatafile = fdata # data file to analyse
 
 		# set data filepath
 		#tmpsourceurl = fdata.partition('\\')[-1]
 		tmpsourceurl = os.path.dirname(fdata)
+		self.activedatadir = tmpsourceurl
+
+
 		if( tmpsourceurl == '' ):
 			self.source_pathdata = self.source_path
 		else:
@@ -433,34 +444,46 @@ class PlwData(object):
 	# CHECK IF JOB ENDING IS ON
 	def ending(self):
 		if len(self.jobending) > 1:
-			activedatafile = self.activedatafile
+			activedatafile = [ self.activedatafile, 'profile.md' ]
+			activedatadir = self.activedatadir
 			sourcedir = self.jobending[0]
 			scanfor = self.jobending[2]
 			i = 0
 			del self.jobending[:]
-			logger.debug("active data file "+activedatafile)
 
-			logger.debug("# BUILD STARTED IN "+sourcedir+" FOR "+scanfor+", activefilename "+activedatafile)
+			logger.debug("#")
+			logger.debug("#")
+			logger.debug("# ENDING BUILD STARTED IN "+sourcedir+" FOR "+scanfor)
+
+
+			logger.debug("active data file "+str(activedatafile))
+			if( activedatadir == '' ):
+				activedatadir = self.source_path
+			logger.debug("active data dir "+activedatadir+" - source_path is "+self.source_path)
+			#self.source_pathdata = self.source_path
+
+
 			try:
 				for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
 					logger.debug("jobending find directory : " + dirpath)
 					if( len(files) > 0 ):
 						for filename in files:
 							#import pdb; pdb.set_trace()
-							if filename != activedatafile and filename.rfind(scanfor) != -1:
-								filetobuild = dirpath.split(self.original_source_path)[1]
-								if( filetobuild[-1] != '\\'):
-									filetobuild += '\\'
-								filetobuild += filename
-								if( filetobuild != activedatafile ):
-									logger.debug("#")
-									logger.debug("build : " + filetobuild)
-									if not self.load_markdown(filetobuild):
-										logger.critical("EMPTY DATA OR DATA WENT WRONG")
-										return False
-									if self.write(self.data, self.template) == False:
-										return False
-									i += 1
+							if( filename not in activedatafile or dirpath != activedatadir ):
+								if filename.rfind(scanfor) != -1:
+									filetobuild = dirpath.split(self.original_source_path)[1]
+									if( len(filetobuild) > 0 and filetobuild[-1] != '\\'):
+										filetobuild += '\\'
+									filetobuild += filename
+									if( True ): #filetobuild != activedatafile ):
+										logger.debug("#")
+										logger.debug("build : " + filetobuild)
+										if not self.load_markdown(filetobuild):
+											logger.critical("EMPTY DATA OR DATA WENT WRONG")
+											return False
+										if self.write(self.data, self.template) == False:
+											return False
+										i += 1
 
 			except Exception as e:
 					logger.critical("error jobending walking dir : "+sourcedir+" "+str(e))

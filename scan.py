@@ -30,12 +30,13 @@ class StringMetadata(str):
 # Generate Index files
 #
 class PlwScan(object):
-	def __init__(self, outpath='', sourcepath=''):
+	def __init__(self, outpath='', sourcepath='', buildmap = 'buildmap'):
 		self.static_idx_path = outpath
 
 		self.routeidx = {}
 		self.routeidxname = ""
 		self.routeisopen = False
+		self.buildmap = buildmap
 
 		# set by scanoption()
 		self.static_path = '' # where html is generated
@@ -64,13 +65,15 @@ class PlwScan(object):
 		if self.useweb == 1:
 			del self.web
 
-	def openidx(self, name):
+	def openidx(self, name = ''):
 		if( self.routeisopen == True ):
 			#logger.info("SCAN is opened - skip or need to close first")
 			return False
 		self.routeisopen = True
+		if( name == ''):
+			name = self.buildmap
 		self.routeidxname = name
-		#logger.info("IDX OPEN for "+name)
+		logger.info("IDX OPEN for "+name)
 		return True
 
 	def closeidx(self):
@@ -79,32 +82,59 @@ class PlwScan(object):
 			return False
 		logger.info("IDX "+self.routeidxname+ " has "+str(len(self.routeidx)))
 		print(self.routeidx)
+		fout = self.buildmap + ".json"
+		try:
+			myFile = open(fout, "w", encoding='utf-8')
+		except FileNotFoundError as e:
+			getdir = os.path.dirname(fout)
+			logger.info("create directory "+getdir+" from "+fout)
+			try:
+				os.makedirs(getdir, 0o777)
+				try:
+					myFile = open(fout, "w", encoding='utf-8')
+				except FileNotFoundError as e:
+					logger.critical("impossible to use file "+fout)
+					return False
+			except:
+				raise
+			#
+			# more error check to add
+			#
+		try:
+			json.dump(self.routeidx, myFile, indent=4)
+		except ValueError as e:
+			logger.critical("ERROR in json generation "+str(e))
+		myFile.close()
+		myFileinfo = os.stat(fout)
+		logger.info("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
+		#logger.debug(data)
 		return True
 
-	def addidx(self, plwd):
+	def addidx(self, data):
 		if( self.routeisopen == False ):
-			#logger.info("SCAN not opened - skip")
+			logger.info("SCAN not opened - skip")
 			return False
+		if( 'url' not in data ):
+			import pdb; pdb.set_trace();
 
 		info = {}
-		url = plwd['sourceurl']
-		#print(plwd)
-		#print(type(plwd))
+		url = data['url']
+		#print(data)
+		#print(type(data))
 
-		info['sourceurl'] = plwd['sourceurl']
+		info['url'] = data['url']
 		try:
-			info['pagetitle'] = plwd['pagetitle']
+			info['pagetitle'] = data['pagetitle']
 		except:
 			info['pagetitle'] = 'no title'
 		try:
-			info['pagedescription'] = plwd['pagedescription']
+			info['pagedescription'] = data['pagedescription']
 		except:
 			info['pagedescription'] = 'no description'
 		self.routeidx[url] = info
 		print(self.routeidx)
 
 		return True
-
 
 	def scan(self, sourcedir, scanfor = '', soption = '@none', jsonfile = "idx.json"):
 		#if sourcedir[-1:] == '\\':
@@ -145,6 +175,7 @@ class PlwScan(object):
 		try:
 			for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
 				logger.debug("scan find directory : %s", dirpath)
+
 				nbgeneration = dirpath.count('\\')
 
 				# root
@@ -165,7 +196,8 @@ class PlwScan(object):
 					self.countid = 1
 					self.tochtml = []
 					self.toclist = {}
-					if( self.idx[-1] == '\\' ):
+					#import pdb; pdb.set_trace();
+					if( len(self.idx) > 0 and self.idx[-1] == '\\' ):
 						self.breadcrump = [ self.idx[-1] ]
 					else:
 						self.breadcrump = [ self.idx ]
@@ -223,6 +255,8 @@ class PlwScan(object):
 								ok = self.scanfile(tocid, scanfor, dirpath, filename, i)
 								if( ok == True ):
 									i += 1
+								elif( ok == 2):
+									logger.debug("skip option for : "+filename)
 								else:
 									logger.critical("error walking file : "+filename)
 									return ''
@@ -326,7 +360,7 @@ class PlwScan(object):
 		scanid = '.'.join(map(str, self.scanid))
 
 		info = {}
-		if( self.idx[-1] == '\\'):
+		if( len(self.idx) > 0 and self.idx[-1] == '\\'):
 			info['folder'] = self.idx[:-1]
 		else:
 			info['folder'] = self.idx
@@ -349,8 +383,10 @@ class PlwScan(object):
 		#return scanid
 
 	def ext_md(self, fname):
-		logger.debug("load markdown file")
+		logger.debug("load markdown file (ext_md)")
 		html = markdown2.markdown_path(fname, extras=["metadata", "markdown-in-html", "tables"])
+		if( 'skip' in html.metadata.keys() and html.metadata['skip'] == '1' ):
+			html = 'skip'
 		return html
 
 	def ext_img(self, fname):
@@ -404,6 +440,9 @@ class PlwScan(object):
 					logger.critical("do not know what to do with : "+fnamext+" file from scan :"+fname)
 					logger.critical("extension not found in parladata definition, skip as a warning")
 					return True
+				elif( html == 'skip' ):
+					logger.debug('file marked as skip: 1 - nothing to do')
+					return 2 # CONST NEED TO BE DEFINED
 
 				logger.debug("load "+fnamext+" file from scan "+ fname)
 				url = plw_get_url(fname, self.static_path, self.static_url, self.source_path)

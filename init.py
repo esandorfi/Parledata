@@ -76,7 +76,7 @@ class PlwInit(object):
 		static_url = config['build']['static_url'].replace('\\', '/')
 		home_url = config['build']['home_url'].replace('\\', '/')
 
-
+		self.buildmap = config['profile']
 
 		# init plwtemplate object (jinja)
 		self.myTemplate = PlwTemplate(config['build']['template_path'], config['build']['static_path'])
@@ -85,7 +85,7 @@ class PlwInit(object):
 		self.myData = PlwData(self.myTemplate)
 
 		# init PlwScan (index content)
-		self.myScan = PlwScan(config['build']['static_idx_path'])
+		self.myScan = PlwScan(config['build']['static_idx_path'], config['build']['source_path'], config['profile'])
 
 		# dict for index generated from plwidx.scan call,
 		# used after in plwdata as { idxname : json full pathname }
@@ -140,6 +140,7 @@ class PlwInit(object):
 	#def __del__(self):
 	def end(self):
 		#import pdb; pdb.set_trace()
+		self.closeidx()
 		dtend = datetime.now()
 		d = dtend - self.dtstart
 		logger.info("--- %s end in %s seconds" %("OK" if self.noError == True else "---- ERROR", d))
@@ -174,7 +175,7 @@ class PlwInit(object):
 		return msg
 
 	# IDX
-	def openidx(self, name):
+	def openidx(self, name = ''):
 		return self.myScan.openidx(name)
 	def closeidx(self):
 		return self.myScan.closeidx()
@@ -194,9 +195,8 @@ class PlwInit(object):
 			self.sethistory("PlwTemplate is not set", CRITICAL)
 			return False
 
-
 		# WRITE STATIC WITH DATA AND TEMPLATE
-		if not self.myData.load_markdown(fdata, isprofile, fhtml):
+		if not self.myData.load_markdown(fdata, isprofile, fhtml, ftemplate):
 			self.sethistory("EMPTY DATA OR DATA WENT WRONG", CRITICAL)
 			self.noError = False
 			return False
@@ -208,8 +208,19 @@ class PlwInit(object):
 		if isjobending == True:
 			self.noError = self.myData.write(self.myData.data, ftemplate, fhtml, isprofile)
 
-		#if( self.noError == True)
-		#	self.noError = self.myScan.addidx(self.myData.data)
+		# for idx
+		if( self.noError == True):
+			if isprofile == True: #open idx when profile document
+				self.openidx()
+
+			if( 'pagetitle' not in self.myData.data ):
+				self.myData.data['pagetitle'] = fdata
+			self.myData.data['zengabarit'] = ftemplate
+			self.myData.data['zensource'] = fdata
+			if( 'url' not in self.myData.data ):
+				self.myData.data['url'] = ''
+			self.noError = self.myScan.addidx(self.myData.data)
+
 		if( self.noError == True):
 			if( isprofile == True ):
 				self.sharedprofile = self.myData.data
