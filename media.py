@@ -15,6 +15,7 @@ import json
 import csv
 from PIL import Image
 import shutil
+import re
 
 from .log import logger
 
@@ -24,7 +25,13 @@ from .log import logger
 #
 class PlwMedia(object):
 	def __init__(self):
-		pass
+
+		self.resize = [ [300, 1, 1],
+						[700, 1.5, 1.5],
+						[2000, 2.5, 8] ]
+		self.resizelen = len(self.resize);
+		for i in self.resize:
+			logger.info('img %d, resize %f, thum %f' %(i[0], i[1], i[2]))
 
 	def __del__(self):
 		pass
@@ -93,6 +100,15 @@ class PlwMedia(object):
 	#	resize
 	#	option: @files for only source directory (no subdirs)
 	def scanimage(self, foldername, sourcedir, targetdir, resizeimg = 2.5, resizeimgth = 10, scanfor = '.jpg', scanoption = '@files', jsonfile = "scanimage.json"):
+		resize = [ [0, resizeimg, resizeimgth] ]
+		resizelen = len(resize)
+		self.scanmedia(foldername, sourcedir, targetdir, resize, resizelen, scanfor, scanoption, jsonfile)
+
+	def scanmedia(self, foldername, sourcedir, targetdir, resize = [], resizelen = 0, scanfor = '.jpg', scanoption = '@files', jsonfile = "scanimage.json"):
+		if( resizelen == 0 ):
+			resize = self.resize
+			resizelen = self.resizelen
+
 		if( targetdir[-1] != '\\' ):
 			targetdir += "\\"
 		logger.info("SCANIMAGE source %s to %s for %s (option %s)" %(sourcedir, targetdir, scanfor, scanoption))
@@ -101,6 +117,8 @@ class PlwMedia(object):
 		isScanOnlyfiles = scanoption.lower().find('@files')
 		logger.info("isScanOnlyfiles "+str(isScanOnlyfiles))
 		imagelist = {}
+		resizeimg = 0
+		resizeimgth = 0
 		try:
 			for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
 
@@ -113,18 +131,33 @@ class PlwMedia(object):
 
 						img = Image.open(fname)
 						nx, ny = img.size
-						logger.debug("image %s format %s width %s mode %s" %(filename, img.format, str(img.size), img.mode))
+						logger.info("====> image %s format %s width %s mode %s" %(filename, img.format, str(img.size), img.mode))
+						for i in resize:
+							if( i[0] <= nx ):
+								resizeimg = i[1]
+								resizeimgth = i[2]
+						logger.info('resize with %f and %f' %(resizeimg, resizeimgth))
+
+
 
 						if( isScanOnlyfiles == -1 ):
+							#import pdb; pdb.set_trace()
 							subdir = dirpath[len(sourcedir):]
-							if subdir[-1] != '\\':
-								subdir += '\\'
+							if( len(subdir) > 0 ):
+								if subdir[-1] != '\\':
+									subdir += '\\'
 							newfile = targetdir+subdir+filename
 							newfileth = targetdir+subdir+"th-"+filename
 							logger.debug("dir "+dirpath + " subdir "+subdir+" file "+filename)
 						else:
 							newfile = targetdir+filename
 							newfileth = targetdir+"th-"+filename
+
+
+						# replace strings for urls
+						newfile = re.sub(r"[^\w\\\\:.]", '-', newfile)
+						newfileth = re.sub(r"[^\w\\\\:.]", '-', newfileth)
+
 
 						imgresize = img.resize((int(nx/resizeimg), int(ny/resizeimg)), Image.BICUBIC)
 						try:
@@ -141,8 +174,8 @@ class PlwMedia(object):
 						imgresizeth = img.resize((int(nx/resizeimgth), int(ny/resizeimgth)), Image.BICUBIC)
 						imgresizeth.save(newfileth,dpi=(72,72))
 
-						imagelist[filenamenoext] = { 'src' : filename, 'srcw' : imgresize.width, 'srch' : imgresize.height,
-							'th' : 'th-'+filename, 'thw' : imgresizeth.width, 'thh' : imgresizeth.height }
+						imagelist[filenamenoext] = { 'src' : subdir+filename, 'srcw' : imgresize.width, 'srch' : imgresize.height,
+							'th' : subdir+'th-'+filename, 'thw' : imgresizeth.width, 'thh' : imgresizeth.height }
 						logger.info("resize %s in %s and %s" %(filename, str(imgresize.size), str(imgresizeth.size)))
 
 				logger.info("find in directory %s : %d files like %s" %(dirpath, nbFiles, scanfor))
@@ -155,7 +188,7 @@ class PlwMedia(object):
 				logger.critical("Error scanimage "+cstr(e))
 				isOk = False
 
-		newjson = targetdir+jsonfile
+		newjson = jsonfile
 		isOk = self.jsondir(newjson, imagelist)
 
 		return isOk

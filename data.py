@@ -8,7 +8,7 @@ import os
 import errno
 import datetime
 import logging
-
+import re
 from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoader, TemplateNotFound, TemplateSyntaxError, UndefinedError
 import markdown2
 import json
@@ -26,12 +26,16 @@ from .misc import plw_get_url, StringMetadata
 #	load
 #	write
 class PlwData(object):
-	def __init__(self, objcfg):
-		self.config = objcfg
+	def __init__(self, objcfg, static_path):
+		self.myTemplate = objcfg  # myTemplate object
+		self.static_path = static_path
+
+
 		self.idxcount = 0
 		self.idx = {}
 		self.myScan = PlwScan()
-		self.static_path = objcfg.static_path
+
+
 		self.jobending = []
 		self.activedatafile = ''
 		self.activedatadir = ''
@@ -46,16 +50,34 @@ class PlwData(object):
 	# LOAD_CSV
 	#	data from csv file
 	def load_csv(self, metakey, fdata):
-		datafile = self.source_pathdata+fdata
+		datafile = fdata
 		if not os.path.exists(datafile):
-			datafile = self.static_path+fdata
+			if( self.source_pathdata != '' ):
+				if( self.source_pathdata[-1] != '\\' ):
+					datafile = self.source_pathdata+'\\'+fdata
+				else:
+					datafile = self.source_pathdata+fdata
 			if not os.path.exists(datafile):
-				logger.critical("skip csv file %s - doesn't exist in %s or in %s " %(fdata, self.source_pathdata, self.static_path))
-				return False
+				datafile = self.static_path+fdata
+				if not os.path.exists(datafile):
+					datafile = self.idxjson_path+fdata
+					if not os.path.exists(datafile):
+						logger.critical("skip csv file %s - doesn't exist in %s or in %s or in %s" %(fdata, self.source_pathdata, self.static_path, self.idxjson_path))
+						return False
+
 		logger.debug("load csv file "+ datafile)
 		fcsv = open(datafile, 'r', encoding='utf-8')
 		try:
-			reader = csv.DictReader(fcsv, delimiter=';')
+			check_csvdelimiter = fcsv.readline()
+			logger.debug("csv header : "+check_csvdelimiter)
+			if( check_csvdelimiter.find(',') > -1 ):
+				csvsep = ','
+			else:
+				csvsep = ';'
+			logger.debug("csv delimiter is "+csvsep)
+			fcsv.seek(0, 0)
+
+			reader = csv.DictReader(fcsv, delimiter=csvsep)
 		except ValueError as e:
 			logger.critical("CSV ERROR "+str(e))
 			return False
@@ -101,6 +123,7 @@ class PlwData(object):
 		try:
 			buf = list(yaml.load_all(fjson))
 		except yaml.YAMLError as exc:
+			logger.critical(str(exc))
 			logger.critical("YAML ERROR in "+datafile)
 			if hasattr(exc, 'problem_mark'):
 				mark = exc.problem_mark
@@ -146,7 +169,7 @@ class PlwData(object):
 	#	ZENSCAN 	scan and load json
 	def check_metadata(self, keyname, keydata, htmlmetadata):
 		if keyname[:6] == 'zencsv':
-			logger.info("%s: %s" % (keyname, keydata))
+			logger.debug("%s: %s" % (keyname, keydata))
 			if keydata.find('.') == -1:
 				logger.warning("META file doesn't have extension !")
 
@@ -154,8 +177,9 @@ class PlwData(object):
 				return False
 
 		elif keyname[:7] == 'zenscan':
-			if keydata.find('.') == -1:
-				keydata += '.json'
+			#if keydata.find('.') == -1:
+			#	keydata += '.json'
+			#import pdb; pdb.set_trace()
 			try:
 				scanname, scanfor, scanoption = keydata.split(' ')
 			except:
@@ -164,46 +188,78 @@ class PlwData(object):
 				logger.critical("zenscan: myscan .md @files")
 				return False
 			sourcedata = self.source_pathdata #htmlmetadata['sourceurl']
-			logger.info("%s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
+			logger.info("== %s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
 			if( self.zenscan(scanname, scanfor, scanoption, sourcedata) == False ):
 				return False
 			# check if job to do after processing this data
 			if( scanoption.find('@build') == 0 ):
-				self.jobending = [ self.source_pathdata, scanname, scanfor, scanoption, sourcedata ]
+				if( self.source_pathdata == '' ):
+					sourcedir = self.source_path
+				else:
+					sourcedir = self.source_pathdata
+				self.jobending = [ sourcedir, scanname, scanfor, scanoption, sourcedata ]
+
+		elif keyname[:8] == 'zenquery':
+			if keydata.find('.') == -1:
+				keydata += '.json'
+			try:
+				scanname, scanfor, scanoption = keydata.split(' ')
+			except:
+				logger.critical("ZENQUERY has 3 arguments separated by space : [json filename generated] [extension to search] [options]")
+				logger.critical("ZENQUERY: [FILETOCREATE.JSON] [.MD] [@ALL|@FILES]")
+				logger.critical("zenquery: myscan .md @files")
+				return False
+			sourcedata = self.source_pathdata #htmlmetadata['sourceurl']
+			logger.info("== %s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
+			if( self.zenquery(scanname, scanfor, scanoption, sourcedata) == False ):
+				return False
+			# check if job to do after processing this data
+			if( scanoption.find('@build') == 0 ):
+				if( self.source_pathdata == '' ):
+					sourcedir = self.source_path
+				else:
+					sourcedir = self.source_pathdata
+				self.jobending = [ sourcedir, scanname, scanfor, scanoption, sourcedata ]
+
 
 		elif keyname[:7] == 'zenyaml':
 			if keydata.find('.') == -1:
 				keydata += '.yaml'
-			logger.info("%s: %s" % (keyname, keydata))
+			logger.info("== %s: %s" % (keyname, keydata))
 			if( self.load_yaml(keyname, keydata) == False ):
 				return False
 
 		elif keyname[:7] == 'zenjson':
 			if keydata.find('.') == -1:
 				keydata += '.json'
-			logger.info("%s: %s" % (keyname, keydata))
+			logger.info("== %s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, keydata) == False ):
 				return False
 
 		elif keyname[:6] == 'zenimg':
 			if keydata.find('.') == -1:
 				keydata += '.json'
-			logger.info("%s: %s" % (keyname, keydata))
+			logger.info("== %s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, keydata) == False ):
 				return False
 
 		elif keyname[:11] == 'zentemplate' or keyname[:10] == 'zengabarit':
 			if( self.template != '' ):
-				logger.info("--- TEMPLATE FORCE %s" % (self.template))
+				#import pdb; pdb.set_trace()
+				logger.debug("== TEMPLATE FORCE %s" % (self.template))
 			else:
-				logger.info("--- TEMPLATE %s: %s" % (keyname, keydata))
+				logger.debug("== TEMPLATE %s: %s" % (keyname, keydata))
 				self.template = keydata
+
+		elif( keyname[:5] == 'image'):
+			htmlmetadata[keyname] = re.sub(r"[^\w\\\\:.]", '-', keydata)
+			logger.debug("== IMAGE translate :" + htmlmetadata[keyname])
 
 		return True
 
 	# ZENSCAN
 	def zenscan(self, scanname, scanfor, scanoption, sourcedata):
-		self.myScan.scanoption(self.config.static_path, self.static_url, self.source_path)
+		self.myScan.scanoption(self.static_path, self.static_url, self.source_path)
 		self.myScan.activeurl(self.url[0])
 		idxfilename = self.myScan.scan(sourcedata, scanfor, scanoption, self.idxjson_path+scanname)
 		self.myScan.activeurl('')
@@ -212,7 +268,15 @@ class PlwData(object):
 			return False
 		return self.load_json("zenscan", idxfilename) # add multiple zenscan issue in future
 
-
+	def zenquery(self, scanname, scanfor, scanoption, sourcedata):
+		self.myScan.scanoption(self.static_path, self.static_url, self.source_path)
+		self.myScan.activeurl(self.url[0])
+		idxfilename = self.myScan.scan(sourcedata, scanfor, scanoption, self.idxjson_path+scanname, 1) #set as zenquery
+		self.myScan.activeurl('')
+		if idxfilename == '' :
+			logger.critical("Error in idx generation with sourcedata "+sourcedata)
+			return False
+		return self.load_json("zenquery", idxfilename) # add multiple zenscan issue in future
 
 	# LOAD_MARKDOWN
 	#	data from markdown file
@@ -245,7 +309,7 @@ class PlwData(object):
 		logger.debug("source_pathdata "+self.source_pathdata)
 		logger.debug("datafile "+datafile)
 
-		self.url = plw_get_url(otherfilename if otherfilename != '' else fdata, self.config.static_path, self.static_url, self.source_path) # url, filename
+		self.url = plw_get_url(otherfilename if otherfilename != '' else fdata, self.static_path, self.static_url, self.source_path) # url, filename
 
 		# verify if data metadata still in memory
 		if self.idxcount > 0:
@@ -275,11 +339,14 @@ class PlwData(object):
 		# add keywords
 		html.metadata['content'] = html
 		html.metadata['url'] = self.url[0]
+		html.metadata['urldir'] = self.url[3]
+		html.metadata['source'] = otherfilename if otherfilename != '' else fdata
 
 		if isprofile == True:
 			html.metadata['rooturl'] = self.root_url
 			html.metadata['fwurl'] = self.fw_url
 			html.metadata['homeurl'] = self.home_url
+			html.metadata['mediaurl'] = self.media_url
 			#html.metadata['sourcedata'] = self.source_data
 			#html.metadata['sourceurl'] = self.content_path+"/"+tmpsourceurl + "/"
 			html.metadata['staticurl'] = self.static_url
@@ -301,6 +368,12 @@ class PlwData(object):
 			for keyname, datavalue in self.idx.items():
 				html.metadata[keyname] = datavalue
 				#logger.debug(html.metadata[keyname])
+
+		if( 'pagetitle' not in html.metadata ):
+			p, f = os.path.split(html.metadata['source'])
+			html.metadata['pagetitle'] = p
+
+
 		# add profile
 		if isprofile == False:
 			html.metadata["profile"] = self.profile
@@ -315,7 +388,7 @@ class PlwData(object):
 			myFile = open(fout, "w", encoding='utf-8')
 		except FileNotFoundError as e:
 			getdir = os.path.dirname(fout)
-			logger.info("create directory "+getdir+" from "+fout)
+			logger.debug("create directory "+getdir+" from "+fout)
 			try:
 				os.makedirs(getdir, 0o777)
 			except OSError as e:
@@ -325,12 +398,13 @@ class PlwData(object):
 
 
 		try:
-			json.dump(self.data, myFile, indent=4)
+			json.dump(self.data, myFile, sort_keys=True,
+                  indent=4, separators=(',', ': '))
 		except ValueError as e:
 			logger.critical("ERROR in json generation "+str(e))
 		myFile.close()
 		myFileinfo = os.stat(fout)
-		logger.debug("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
+		logger.info("WRITE > %s : %d bytes" % (fout, myFileinfo.st_size))
 		#import pdb; pdb.set_trace()
 
 
@@ -350,10 +424,13 @@ class PlwData(object):
 		else:
 			tmpfile = curtemplate + ".html"
 
-		myTemplatefile = next((x for x in self.config.templates_env.list_templates() if x == tmpfile ), "")
-		if myTemplatefile == '':
-			logger.critical("template not found : "+tmpfile)
-			return False
+		if( self.writehtml ):
+			myTemplatefile = next((x for x in self.myTemplate.templates_env.list_templates() if x == tmpfile ), "")
+			if myTemplatefile == '':
+				logger.critical("template not found : "+tmpfile)
+				return False
+		else:
+			myTemplatefile = tmpfile
 		logger.debug("use template : "+myTemplatefile)
 
 		# load data
@@ -364,7 +441,7 @@ class PlwData(object):
 			writeJson = False
 		else:
 			writeJson = True
-
+		logger.debug("writeJson is "+str(writeJson)+" curstatic is "+curstatic)
 		# write data
 		# 	check if curstatic have '.', if not add '.html'
 		#logger.info("DATA URL "+self.url[0]+" OUT "+self.url[1])
@@ -373,24 +450,36 @@ class PlwData(object):
 
 		if( '.' in curstatic ):
 			#logger.info("1 "+curstatic)
-			myStaticfile = self.config.static_path+curstatic
-			myJsonfile = myStaticfile.partition('.')[0]+".json"
+			if( isprofile == True ):
+				myStaticfile = self.idxjson_path+curstatic
+			else:
+				myStaticfile = self.static_path+curstatic
+			myJsonfile = myStaticfile.rsplit('.', 1)[0]+".json"
 
+			self.data['json'] = curstatic.rsplit('.', 1)[0]+".json"
 		elif curstatic == '':
 			myStaticfile = self.url[1]
-			#logger.info("2 "+myStaticfile)
 			if( '.' in myStaticfile ):
-				myJsonfile = myStaticfile.partition('.')[0]+".json"
+				myJsonfile = myStaticfile.rsplit('.', 1)[0]+".json"
 			else:
 				myJsonfile = myStaticfile+".json"
+			if( isprofile == True ):
+				self.data['json'] = myJsonfile.replace(self.static_path, self.idxjson_path)
+				myJsonfile = self.data['json']
+			else:
+				self.data['json'] = myJsonfile
+			#logger.info("2 "+myJsonfile)
 		else:
 			#logger.info("3 "+curstatic)
-			myStaticfile = self.config.static_path+curstatic + ".html"
-			myJsonfile = self.config.static_path+curstatic + ".json"
+			myStaticfile = self.static_path+curstatic + ".html"
+			myJsonfile = self.static_path+curstatic + ".json"
+			self.data['json'] = curstatic+".json"
 		#logger.info("HTML FILE  "+myStaticfile)
 		#logger.info("JSON FILE "+myJsonfile)
 
+
 		if( isprofile == True ):
+			#import pdb; pdb.set_trace()
 			self.profile = self.data
 			self.data = { "profile" : self.profile }
 			logger.debug("initialize profile in json data")
@@ -400,41 +489,42 @@ class PlwData(object):
 			return True
 
 		# generate static html file from data and template
-		try:
-			myTemplate = self.config.templates_env.get_template(myTemplatefile)
-			html = myTemplate.render(self.data)
-			#print(html)
+		if( self.writehtml ):
 			try:
-				myFile = open(myStaticfile, "w", encoding='utf-8')
-			except FileNotFoundError as e:
-				getdir = os.path.dirname(myStaticfile)
-				logger.info("create directory "+getdir+" from "+myStaticfile)
+				myTemplate = self.myTemplate.templates_env.get_template(myTemplatefile)
+				html = myTemplate.render(self.data)
+				#print(html)
 				try:
-					os.makedirs(getdir, 0o777)
-				except OSError as e:
-					if e.errno != errno.EEXIST:
-						raise
-				myFile = open(myStaticfile, "w", encoding='utf-8')
-			myFile.write(html)
-			myFile.close()
-			myFileinfo = os.stat(myStaticfile)
-			logger.info("generate html file %s : %d bytes" % (myStaticfile, myFileinfo.st_size))
+					myFile = open(myStaticfile, "w", encoding='utf-8')
+				except FileNotFoundError as e:
+					getdir = os.path.dirname(myStaticfile)
+					logger.info("create directory "+getdir+" from "+myStaticfile)
+					try:
+						os.makedirs(getdir, 0o777)
+					except OSError as e:
+						if e.errno != errno.EEXIST:
+							raise
+					myFile = open(myStaticfile, "w", encoding='utf-8')
+				myFile.write(html)
+				myFile.close()
+				myFileinfo = os.stat(myStaticfile)
+				logger.info("WRITE > %s : %d bytes" % (myStaticfile, myFileinfo.st_size))
 
-		except TemplateNotFound as e:
-			logger.critical("ERROR JINJA template not found : "+str(e))
-			return False
+			except TemplateNotFound as e:
+				logger.critical("ERROR JINJA template not found : "+str(e))
+				return False
 
-		except TemplateSyntaxError as e:
-			logger.critical("ERROR JINJA template syntax error : "+str(e))
-			#return False
-			#continue jinja exception to get line number information
-			raise
-		except UndefinedError as e:
-			logger.critical("ERROR JINJA variable not defined : "+str(e))
-			raise
-		except ValueError as e:
-			logger.critical("ERROR in generate html "+str(e))
-			return False
+			except TemplateSyntaxError as e:
+				logger.critical("ERROR JINJA template syntax error : "+str(e))
+				#return False
+				#continue jinja exception to get line number information
+				raise
+			except UndefinedError as e:
+				logger.critical("ERROR JINJA variable not defined : "+str(e))
+				raise
+			except ValueError as e:
+				logger.critical("ERROR in generate html "+str(e))
+				return False
 
 		# generate json data file
 		if writeJson is True:
@@ -442,7 +532,7 @@ class PlwData(object):
 		return True
 
 	# CHECK IF JOB ENDING IS ON
-	def ending(self):
+	def ending(self, scanobj):
 		if len(self.jobending) > 1:
 			activedatafile = [ self.activedatafile, 'profile.md' ]
 			activedatadir = self.activedatadir
@@ -450,6 +540,10 @@ class PlwData(object):
 			scanfor = self.jobending[2]
 			i = 0
 			del self.jobending[:]
+
+			if( sourcedir == '' ):
+				logger.info("JOBENDING ERROR - no sourcedir defined")
+				return False
 
 			logger.debug("#")
 			logger.debug("#")
@@ -465,13 +559,17 @@ class PlwData(object):
 
 			try:
 				for dirnum, (dirpath, dirs, files) in enumerate(os.walk(sourcedir)):
-					logger.debug("jobending find directory : " + dirpath)
+					logger.debug("jobending find directory : " + dirpath+" original source path "+self.original_source_path)
 					if( len(files) > 0 ):
 						for filename in files:
 							#import pdb; pdb.set_trace()
 							if( filename not in activedatafile or dirpath != activedatadir ):
 								if filename.rfind(scanfor) != -1:
-									filetobuild = dirpath.split(self.original_source_path)[1]
+									ftb = dirpath.split(self.original_source_path) # [1q]
+									if len(ftb) > 1:
+										filetobuild = ftb[1]
+									else:
+										filetobuild = ftb[0]
 									if( len(filetobuild) > 0 and filetobuild[-1] != '\\'):
 										filetobuild += '\\'
 									filetobuild += filename
@@ -479,10 +577,11 @@ class PlwData(object):
 										logger.debug("#")
 										logger.debug("build : " + filetobuild)
 										if not self.load_markdown(filetobuild):
-											logger.critical("EMPTY DATA OR DATA WENT WRONG")
+											logger.critical("EMPTY DATA OR DATA WENT WRONG with "+filetobuild)
 											return False
 										if self.write(self.data, self.template) == False:
 											return False
+										scanobj.addidx(self.data)
 										i += 1
 
 			except Exception as e:

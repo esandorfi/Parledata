@@ -29,7 +29,7 @@ from logging import DEBUG, CRITICAL, INFO
 # GLOBAL VARIABLES
 # info
 
-WEBMASTER = 'Parledata from Parle Web'
+WEBMASTER = 'Parle Data from Parle Web'
 
 # return dict values
 def get_v(data, *args):
@@ -78,24 +78,45 @@ class PlwInit(object):
 
 		self.buildmap = config['profile']
 
+		#import pdb; pdb.set_trace()
+		self.writehtml = True
+		if 'nohtml' in config['build'] and config['build']['nohtml'] == 1:
+			self.writehtml = False
+			logger.info("--- NOHTML IS TRUE - NO HTML WILL BE GENERATED, ONLY JSON FILES")
+
+
+		if not config['build']['static_path'][-1] == '\\':
+			config['build']['static_path'] = config['build']['static_path'] + '\\'
+
+		self.static = config['build']['static_path']
+
 		# init plwtemplate object (jinja)
-		self.myTemplate = PlwTemplate(config['build']['template_path'], config['build']['static_path'])
+		if( self.writehtml ):
+			self.myTemplate = PlwTemplate(config['build']['template_path'], config['build']['static_path'])
+		else:
+			self.myTemplate = {}
 
 		# init PlwData (data content to html/json)
-		self.myData = PlwData(self.myTemplate)
+		self.myData = PlwData(self.myTemplate, self.static)
+		self.myData.writehtml = self.writehtml
 
 		# init PlwScan (index content)
-		self.myScan = PlwScan(config['build']['static_idx_path'], config['build']['source_path'], config['profile'])
+		self.myScan = PlwScan()
+		self.myScan.initload(config)
 
 		# dict for index generated from plwidx.scan call,
 		# used after in plwdata as { idxname : json full pathname }
 		self.myData.idxjson = {}
 
+
+
 		# directories for geting data and creating html
 		# and be sure static has end \
 		if not config['build']['source_path'][-1] == '\\':
 			config['build']['source_path'] = config['build']['source_path'] + '\\'
-		self.static = config['build']['static_path']
+
+
+		self.myData.static_path = self.static # do a 2nd time after init - just to understand code better
 		self.myData.home_url = config['build']['home_url']
 		self.myData.source_path = config['build']['source_path']
 		self.myData.original_source_path = config['build']['source_path']
@@ -103,6 +124,14 @@ class PlwInit(object):
 		self.myData.source_data = config['build']['profile_path']
 		self.myData.content_path = config['build']['data_path']
 		# path in static dir where idx json files are generated
+
+		if( 'media_path' in config['build'] ):
+			self.myData.media_path = config['build']['media_path']
+		else:
+			self.myData.media_path = self.static + "media"
+		self.media_path = self.myData.media_path
+
+
 		self.myData.idxjson_path = config['build']['static_idx_path']
 
 		# url defined for jinja templates
@@ -112,6 +141,14 @@ class PlwInit(object):
 		self.static_url = config['build']['static_url']
 		self.myData.profile = config['build'] # instead of {}
 
+		if( 'media_url' in config['build'] ):
+			self.myData.media_url = config['build']['media_url']
+		else:
+			self.myData.media_url = self.static_url + "media"
+		self.media_url = self.myData.media_url
+
+
+
 		# webmaster string in jinja head
 		self.myData.webmaster = config['build']['webmaster']
 
@@ -120,34 +157,22 @@ class PlwInit(object):
 		self.noError = True
 		self.sharedprofile = self.myData.profile # instead of {}
 		#pprint(self.sharedprofile)
-		"""
-		# log variables
-		logger.debug("ZEN PlwInit - Input arguments")
-		logger.debug("source_path "+source_path+" (known as source_path)")
-		logger.debug("profile_path "+profile_path+" (known as source_data)")
-		logger.debug("static_path "+static_path+" (known as static)")
-		logger.debug("root_url "+root_url)
-		logger.debug("fw_url "+fw_url)
-		logger.debug("static_url "+static_url)
-		logger.debug("template_path "+template_path)
-		logger.debug("data_path "+data_path+ " (known as content_path)")
-		logger.debug("static_idx_path "+static_idx_path +" (known as idxjson_path)")
-		logger.debug("home_url "+home_url)
-		"""
+
 		# init loaded
 		self.isInit = True
 
 	#def __del__(self):
-	def end(self):
+	def end(self, justClose = False):
 		#import pdb; pdb.set_trace()
 		self.closeidx()
-		dtend = datetime.now()
-		d = dtend - self.dtstart
-		logger.info("--- %s end in %s seconds" %("OK" if self.noError == True else "---- ERROR", d))
-		if self.noError == True:
-			logger.info("--- OK, IT IS DONE")
-		else:
-			logger.info("--- ERROR")
+		if( not justClose ):
+			dtend = datetime.now()
+			d = dtend - self.dtstart
+			logger.info("--- %s end in %s seconds" %("OK" if self.noError == True else "---- ERROR", d))
+			if self.noError == True:
+				logger.info("--- OK, IT IS DONE")
+			else:
+				logger.info("--- ERROR")
 
 	def clearhistory(self):
 		del self.history
@@ -155,14 +180,14 @@ class PlwInit(object):
 
 	def sethistory(self, history, type = INFO):
 		if( type == DEBUG ):
-			msg = "+ "
+			msg = "(debug history) "
 			logger.debug(history)
 		elif( type == CRITICAL ):
-			msg = "!!!!!!!! "
+			msg = "(!!!!!!!! history) "
 			logger.critical(history)
 		else:
-			msg = ""
-			logger.info(history)
+			msg = "(history) "
+			logger.debug(history)
 		if( not self.history ):
 			self.history = []
 		self.history.append(msg+history)
@@ -178,7 +203,11 @@ class PlwInit(object):
 	def openidx(self, name = ''):
 		return self.myScan.openidx(name)
 	def closeidx(self):
-		return self.myScan.closeidx()
+		if( self.noError == True ):
+			return self.myScan.closeidx()
+		else:
+			return self.noError
+
 
 	# ROUTE
 	# GENERATE HTML FILE
@@ -189,12 +218,13 @@ class PlwInit(object):
 
 		if self.stopIfError is True and self.noError is False:
 			self.sethistory("Previous error - skip next file : "+fhtml, CRITICAL)
-
 			return False
-		if not self.myTemplate.is_valid():
+
+		if self.writehtml and not self.myTemplate.is_valid():
 			self.sethistory("PlwTemplate is not set", CRITICAL)
 			return False
 
+		self.myData.myScan = self.myScan
 		# WRITE STATIC WITH DATA AND TEMPLATE
 		if not self.myData.load_markdown(fdata, isprofile, fhtml, ftemplate):
 			self.sethistory("EMPTY DATA OR DATA WENT WRONG", CRITICAL)
@@ -218,8 +248,13 @@ class PlwInit(object):
 			self.myData.data['zengabarit'] = ftemplate
 			self.myData.data['zensource'] = fdata
 			if( 'url' not in self.myData.data ):
-				self.myData.data['url'] = ''
-			self.noError = self.myScan.addidx(self.myData.data)
+				if( isprofile == True):
+					self.myData.data['url'] = 'profile.json'
+					self.myData.data['type'] = 'profile'
+				else:
+					self.myData.data['url'] = 'empty'
+			self.myScan.addidx(self.myData.data)
+			# self.noError = self.myScan.addidx(self.myData.data)
 
 		if( self.noError == True):
 			if( isprofile == True ):
@@ -229,7 +264,7 @@ class PlwInit(object):
 			if( isjobending == True ):
 				if( self.myData.url ):
 					self.sethistory(fdata +" + " +ftemplate +"-> "+self.myData.url[0])
-				self.noError = self.myData.ending()
+				self.noError = self.myData.ending(self.myScan)
 
 		return self.noError
 
@@ -247,6 +282,7 @@ class PlwInit(object):
 		logger.info("#")
 		logger.info("# source_path : "+self.myData.source_path)
 
+	"""
 	# PUSH STATIC
 	# 	ADD SUBFOLDER TO STATIC PATH
 	#	set variable PWLTEMPLATE static_path
@@ -273,13 +309,31 @@ class PlwInit(object):
 		#no need ## self.myData.static_url = self.static_url +ffolder+"/"
 		self.myTemplate.set_staticpath(tmppath)
 		self.myData.static_path = self.myTemplate.static_path
+	"""
 
 	def getstatic(self):
 		if self.isInit == False:
 			logger.critical("No configuration loaded")
 			return False
+		return self.static
 
-		return self.myTemplate.static_path
+	def getmedia(self):
+		if self.isInit == False:
+			logger.critical("No configuration loaded")
+			return False
+		return self.myData.media_path
+
+	def getsource(self):
+		if self.isInit == False:
+			logger.critical("No configuration loaded")
+			return False
+		return self.original_source_path
+
+	def getjson(self):
+		if self.isInit == False:
+			logger.critical("No configuration loaded")
+			return False
+		return self.myData.idxjson_path
 
 	# PROFILE
 	#	SET SHARED COMMUN INFORMATION FROM A SPECIFIC FILE
@@ -292,7 +346,7 @@ class PlwInit(object):
 		if self.stopIfError is True and self.noError is False:
 			return False
 		logger.debug("# load commun profile file : "+fdata)
-		self.route(fdata, 'console/profile', '', True)
+		self.route(fdata, 'profile', '', True)
 
 	# ADDIDX
 	#	ADDIDX
@@ -302,4 +356,4 @@ class PlwInit(object):
 			return False
 
 		self.myData.idxjson[idxname] = idxpath;
-		logger.debug("add idx [%s] from %s" %(idxname, idxpath))
+		logger.info("INIT ADD idx [%s] from %s" %(idxname, idxpath))

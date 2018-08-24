@@ -1,10 +1,29 @@
-import logging
-from log import logger
-from scan import PlwScan
-from misc import plw_get_url, StringMetadata
+# BUILD SCAN FOR SCREENSHOT
 
+import sys, os, argparse
 
+enginepath = "c:\\www-parledata";
+sys.path.append(enginepath)
+try:
+	import parledata as zen
+except ModuleNotFoundError as e:
+	print("MODULE NOT FOUND "+str(e))
+	sys.exit(1)
 
+profile = 'pld'
 
-print("Parledata")
-logger.info("Ok")
+args = zen.args()
+myConfig = zen.PlwConfig(profile)
+if args.verbose == '1':
+	zen.loglevel(1)
+if( myConfig.config is None ):
+	sys.exit(1)
+
+myZen = zen.PlwInit()
+myZen.initload(myConfig.config)
+
+if(args.source):
+	for f in args.source:
+		myZen.route(f)
+
+myZen.end()

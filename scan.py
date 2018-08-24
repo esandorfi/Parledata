@@ -52,10 +52,14 @@ class PlwScan(object):
 
 		# extension
 		self.extload = {
-			'.md': self.ext_md,
+			'.md': self.ext_md, '.csv' : self.ext_csv,
 			'.jpg' : self.ext_img, '.png' : self.ext_img,
 			'.avi' : self.ext_video, '.mp4' : self.ext_video,
-			'.htm' : self.ext_html, '.html' : self.ext_html
+			'.htm' : self.ext_html, '.html' : self.ext_html,
+			'.odt' : self.ext_file, '.ods' : self.ext_file,
+			'.indd' : self.ext_file, '.pdf' : self.ext_file,
+			'.doc' : self.ext_file, '.xls' : self.ext_file,
+			'.docx' : self.ext_file, '.xlsx' : self.ext_file,
 		}
 
 		# use web selenium for screenshot
@@ -73,16 +77,15 @@ class PlwScan(object):
 		if( name == ''):
 			name = self.buildmap
 		self.routeidxname = name
-		logger.info("IDX OPEN for "+name)
+		logger.debug("IDX OPEN for "+name)
 		return True
 
 	def closeidx(self):
 		if( self.routeisopen == False ):
 			#logger.info("SCAN not opened - skip")
 			return False
-		logger.info("IDX "+self.routeidxname+ " has "+str(len(self.routeidx)))
-		print(self.routeidx)
-		fout = self.buildmap + ".json"
+
+		fout = self.static_idx_path+self.buildmap + ".json"
 		try:
 			myFile = open(fout, "w", encoding='utf-8')
 		except FileNotFoundError as e:
@@ -106,8 +109,9 @@ class PlwScan(object):
 			logger.critical("ERROR in json generation "+str(e))
 		myFile.close()
 		myFileinfo = os.stat(fout)
-		logger.info("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
+		logger.info("WRITE > %s : %d bytes (%d items)" % (fout, myFileinfo.st_size, len(self.routeidx)))
 		#logger.debug(data)
+		self.routeisopen = False
 		return True
 
 	def addidx(self, data):
@@ -126,17 +130,56 @@ class PlwScan(object):
 		try:
 			info['pagetitle'] = data['pagetitle']
 		except:
-			info['pagetitle'] = 'no title'
+			pass
+
 		try:
 			info['pagedescription'] = data['pagedescription']
 		except:
-			info['pagedescription'] = 'no description'
-		self.routeidx[url] = info
-		print(self.routeidx)
+			pass
+
+		try:
+			info['zengabarit'] = data['zengabarit']
+		except:
+			pass
+
+		try:
+			info['source'] = data['source']
+			info['source'].replace(self.source_path, '')
+		except:
+			pass
+
+		try:
+			info['json'] = data['json'].replace(self.static_idx_path, '').lower()
+			info['json'] = info['json'].replace(self.static_path, '')
+		except:
+			pass
+
+		if( 'type' in data ):
+			info['type'] = data['type']
+			type = data['type']
+
+			if( type == 'zenquery' or type == 'zenscan' ):
+				url = url.replace('.json', '')
+		else:
+			type = 'url'
+			info['type'] = type
+			url = url.replace( self.static_url, '' ).replace('.html', '')
+
+			"""
+			slug = url.split('/')
+			if( len(slug) > 0 )
+				info['slug']
+			"""
+
+
+		if( type not in self.routeidx ):
+			self.routeidx[type] = {}
+		self.routeidx[type][url] = info
+		logger.debug("SCAN ADD IDX "+type+' ==> '+info['url']+' -- '+self.static_path)
 
 		return True
 
-	def scan(self, sourcedir, scanfor = '', soption = '@none', jsonfile = "idx.json"):
+	def scan(self, sourcedir, scanfor = '', soption = '@none', jsonfile = "idx.json", isQuery = 0):
 		#if sourcedir[-1:] == '\\':
 		#	sourcedir = sourcedir[:-1]
 		#import pdb; pdb.set_trace()
@@ -149,7 +192,9 @@ class PlwScan(object):
 		#
 
 		scanoption = soption.lower()
-		logger.debug("ZENSCAN source %s for %s (option %s)" %(sourcedir, scanfor, scanoption))
+		if( sourcedir == '' ):
+			sourcedir = self.source_path
+		logger.debug("%s source %s for %s (option %s)" %( "ZENSCAN" if isQuery == 0 else "ZENQUERY", sourcedir, scanfor, scanoption))
 		isScanOnlyfiles = scanoption.find('@files')
 		isScreenshot = scanoption.find('@screenshot')
 		if( isScreenshot == 0 ):
@@ -184,19 +229,13 @@ class PlwScan(object):
 					self.idxgeneration = nbgeneration
 					self.generation = 0
 					self.parent = 0
-					#self.idx = self.idxroot
-					#self.idx = dirpath.split('\\')[:-1]
 					self.idx = self.idxroot.split(self.source_path)[-1]
-					#if( self.idx[-1] == '\\' ):
-					#	self.idx = self.idx[:-1]
-
 					self.scanid = []
 					self.scanid.append(1) # check if ok
 					self.lenidbefore = 0
 					self.countid = 1
 					self.tochtml = []
 					self.toclist = {}
-					#import pdb; pdb.set_trace();
 					if( len(self.idx) > 0 and self.idx[-1] == '\\' ):
 						self.breadcrump = [ self.idx[-1] ]
 					else:
@@ -231,12 +270,33 @@ class PlwScan(object):
 
 					self.generation = nbgeneration
 					self.idx = dirpath.split(self.idxroot+'\\')[-1].split('\\')[-1]
+					# check for -
+					sep = self.idx.find('-')
+					if( sep != -1 ):
+						#logger.info('sep is find : as '+self.idx[:sep])
+						if( self.idx[:sep].isnumeric() is True ):
+							sep = sep + 1
+							self.idx = self.idx[sep:]
+							#logger.info('is numeric now :' +self.idx)
+
+
+
+
 					self.curdirnum = dirnum
 					self.breadcrump.append(self.idx)
 					logger.debug("add breadcrump "+self.idx +" len "+str(len(self.breadcrump))+" breadcrump "+'>'.join(self.breadcrump))
 
 				# add to scan memory the directory
-				if( len(files) > 0 ):
+				if( len(files) == 0 ):
+					isEmpty = True
+					#import pdb; pdb.set_trace()
+					self.lenidbefore = len(''.join(map(str, self.scanid)))
+					tocid = '.'.join(map(str, self.scanid))
+					logger.debug("SCAN "+tocid+" FOR "+scanfor)
+					i = 1
+					self.emptyfile(tocid, i)
+				else:
+					isEmpty = False
 					self.scandir(dirpath, dirs, files)
 					# just pure number without .
 					self.lenidbefore = len(''.join(map(str, self.scanid)))
@@ -246,26 +306,31 @@ class PlwScan(object):
 						i = 1
 						self.toclist[tocid]['scan'] = {}
 						for filename in files:
-							if filename.rfind(scanfor) != -1:
+
+							multiplescanfor = tuple(scanfor.lower().split('|'))
+							if filename.endswith(multiplescanfor):
+
+							#if filename.rfind(scanfor) != -1:
 								if i > 1:
-									#self.countid += 1
-									#self.scanid.append(self.countid)
-									#tocid = '.'.join(map(str, self.scanid))
 									logger.debug("SCAN ADD "+tocid+" FOR "+scanfor)
-								ok = self.scanfile(tocid, scanfor, dirpath, filename, i)
+								ok = self.scanfile(tocid, scanfor, dirpath, filename, -1 if isQuery == 1 else i )
 								if( ok == True ):
 									i += 1
 								elif( ok == 2):
 									logger.debug("skip option for : "+filename)
 								else:
 									logger.critical("error walking file : "+filename)
-									return ''
+									logger.info("skip it ")
 
-				self.toclist[tocid]['breadcrump'] = list(self.breadcrump)
-				self.toclist[tocid]['scanlen'] = len(self.toclist[tocid]['scan'])
-				if isScanOnlyfiles != -1:
-					logger.debug("scan only files - option set with @files")
-					break
+
+				if( isEmpty == False ):
+					self.toclist[tocid]['breadcrump'] = list(self.breadcrump)
+					self.toclist[tocid]['scanlen'] = len(self.toclist[tocid]['scan'])
+					if isScanOnlyfiles != -1:
+						logger.debug("scan only files - option set with @files")
+						break
+				else:
+					self.toclist[tocid]['scanlen'] = 0
 
 
 
@@ -306,7 +371,9 @@ class PlwScan(object):
 		#self.htmldir()
 		if jsonfile.find('.json') == -1:
 			jsonfile += '.json'
-		self.jsondir(jsonfile)
+
+		#logger.info('JSONDIR')
+		self.jsondir(jsonfile, isQuery)
 
 
 		return jsonfile
@@ -316,17 +383,12 @@ class PlwScan(object):
 		logger.debug("HTML")
 		logger.debug(self.tochtml)
 
-	def jsondir(self, fout):
+	def jsondir(self, fout, isQuery = 0):
 		logger.debug("JSON")
-		#logger.info("toclist 2 " + str(self.toclist['2']))
-		data = self.toclist
-		#data = json.dumps(self.toclist, indent=4, sort_keys=True)
-		#logger.debug("JSON DUMP")
-		#logger.debug(data)
-
-
-
-		#pprint(data)
+		if( isQuery == 1 ): # from zenquery
+			data = self.toclist['1']['scan']
+		else:
+			data = self.toclist
 		try:
 			myFile = open(fout, "w", encoding='utf-8')
 		except FileNotFoundError as e:
@@ -350,8 +412,15 @@ class PlwScan(object):
 			logger.critical("ERROR in json generation "+str(e))
 		myFile.close()
 		myFileinfo = os.stat(fout)
-		logger.info("generate json file %s : %d bytes" % (fout, myFileinfo.st_size))
+		logger.info("WRITE > %s : %d bytes" % (fout, myFileinfo.st_size))
 		#logger.debug(data)
+
+		info = {
+			'url' : os.path.split(fout)[1],
+			'type' : 'zenscan' if isQuery == 0 else 'zenquery',
+			'json' : fout,
+		}
+		self.addidx(info)
 		return True
 
 	def scandir(self, dirpath, dirs, files):
@@ -359,11 +428,24 @@ class PlwScan(object):
 		nbfiles = len(files)
 		scanid = '.'.join(map(str, self.scanid))
 
+		sep = self.idx.find('-')
+		if( sep != -1 ):
+			#logger.info('sep is find : as '+self.idx[:sep])
+			if( self.idx[:sep].isnumeric() is True ):
+				sep = sep + 1
+				self.idx = self.idx[sep:]
+				#logger.info('is numeric now :' +self.idx)
+
+		logger.info('   ===> '+scanid+", "+self.idx)
 		info = {}
-		if( len(self.idx) > 0 and self.idx[-1] == '\\'):
-			info['folder'] = self.idx[:-1]
+		if( len(self.idx) > 0 ):
+			if( self.idx[-1] == '\\' ):
+				info['folder'] = self.idx[:-1]
+			else:
+				info['folder'] = self.idx
 		else:
-			info['folder'] = self.idx
+			info['folder'] = '/'
+
 		info['nbfiles'] = nbfiles
 
 		# manage deep as
@@ -395,6 +477,73 @@ class PlwScan(object):
 		html.metadata = { 'filetype' : 'image' }
 		return html
 
+	def ext_csv(self, fname):
+		logger.debug("load csv file "+fname)
+
+
+		msgerror = ''
+		noError = True
+		datafile = fname
+
+		htmlcontent = fname.replace(self.source_path, '')
+		logger.debug("htmlcontent "+htmlcontent)
+		html = StringMetadata(htmlcontent)
+		"""
+		if not os.path.exists(datafile):
+			if( self.source_pathdata != '' ):
+				if( self.source_pathdata[-1] != '\\' ):
+					datafile = self.source_pathdata+'\\'+fdata
+				else:
+					datafile = self.source_pathdata+fdata
+			if not os.path.exists(datafile):
+				datafile = self.static_path+fdata
+				if not os.path.exists(datafile):
+					datafile = self.idxjson_path+fdata
+					if not os.path.exists(datafile):
+						logger.critical("skip csv file %s - doesn't exist in %s or in %s or in %s" %(fdata, self.source_pathdata, self.static_path, self.idxjson_path))
+						return False
+		"""
+		logger.debug("load csv file "+ datafile)
+		fcsv = open(datafile, 'r', encoding='utf-8')
+		try:
+			check_csvdelimiter = fcsv.readline()
+			logger.debug("csv header : "+check_csvdelimiter)
+			if( check_csvdelimiter.find(',') > -1 ):
+				csvsep = ','
+			else:
+				csvsep = ';'
+			logger.debug("csv delimiter is "+csvsep)
+			fcsv.seek(0, 0)
+
+			reader = csv.DictReader(fcsv, delimiter=csvsep)
+		except ValueError as e:
+			msgerror = "CSV ERROR "+str(e)
+			logger.critical(msgerror)
+			noError = False
+
+		tmplist = []
+		if( noError ):
+			try:
+				key = '-'.join(reader.fieldnames)
+				for each in reader:
+					tmplist.append(each)
+			except UnicodeDecodeError as e:
+				msgerror = "CSV DECODE ERROR "+str(e)
+				logger.critical(msgerror)
+				noError = False
+
+			except:
+				msgerror = "CSV READ FORMAT ERROR "
+				logger.critical(msgerror)
+				noError = False
+
+		if( noError ):
+			html.metadata = { 'filetype' : 'csv', 'fieldnames': key, 'data' : tmplist }
+		else:
+			html.metadata = { 'filetype' : 'csv', 'errorfile' : fname, 'error' : msgerror }
+		return html
+
+
 	def ext_html(self, fname):
 		logger.debug("load html file")
 		html = StringMetadata(fname)
@@ -413,6 +562,15 @@ class PlwScan(object):
 
 		return html
 
+	def ext_file(self, fname):
+		html = StringMetadata(fname)
+		finfo = os.stat(fname)
+		html.metadata = { 'filetype' : 'file', 'filename' : fname,
+		'filesize'  : finfo.st_size, 'filemodified' : finfo.st_mtime }
+
+		return html
+
+
 
 	def ext_video(self, fname):
 		logger.debug("load video file")
@@ -420,11 +578,28 @@ class PlwScan(object):
 		html.metadata = { 'filetype' : 'video' }
 		return html
 
+	def emptyfile(self, tocid, i):
+		html = StringMetadata('empty')
+		html.metadata = { 'filetype' : 'empty' }
+		html.metadata['url'] = 'empty'
+		info = {}
+		info['folder'] = self.idx
+		info['nbfiles'] = 0
+		info['deep'] = len(self.scanid)
+		info['deepbefore'] = self.lenidbefore
+		self.toclist[tocid] = info
+		self.toclist[tocid]['scan'] = {}
+		self.toclist[tocid]['scan'][i] = {}
+		self.toclist[tocid]['scan'][i] = html.metadata
+		return False
+
 
 	def scanfile(self, tocid, scanfor, dirpath, filename, i):
 		fname = os.path.join(dirpath,filename).lower()
 		fnamext = os.path.splitext(fname)[1]
-		if fname.endswith(scanfor.lower()):
+		#import pdb; pdb.set_trace()
+		multiplescanfor = tuple(scanfor.lower().split('|'))
+		if fname.endswith(multiplescanfor):
 			try:
 				statinfo = os.stat(fname)
 				logger.debug(" file: "+fname+" size: "+str(statinfo.st_size))
@@ -455,6 +630,10 @@ class PlwScan(object):
 				html.metadata['contentdate'] = datetime.datetime.fromtimestamp(statinfo.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
 				#time.ctime(statinfo.st_mtime)
 
+				#is zenquery
+				if( i == -1 ):
+					i = url[2]
+
 				logger.debug('active url %s and %s' %(self.active_url, url[0]))
 				if( self.active_url != '' and self.active_url == url[0] ):
 					logger.debug('not include file as active url : ' + self.active_url)
@@ -464,6 +643,8 @@ class PlwScan(object):
 			except ValueError as e:
 				logger.critical("Error as "+str(e))
 				return False
+			except:
+				raise
 			return True
 		else:
 			return False
@@ -516,14 +697,15 @@ class PlwScan(object):
 	# INITLOAD
 	#	loadconfig
 	def initload(self, config):
-		self.static_idx_path = config['scan']['static_idx_path']
-		self.static_path = config['scan']['static_path'].lower()
-		self.screenshot_url = config['scan']['screenshot_url'].lower()
-		self.screenshot_static_path = config['scan']['screenshot_static_path'].lower()
-		if( self.screenshot_static_path[-1] != '\\' ):
-			self.screenshot_static_path += '\\'
-		self.static_url = config['scan']['static_url'].lower()
-		self.source_path = config['scan']['source_path'].lower()
+		self.static_idx_path = config['build']['static_idx_path']
+		self.static_path = config['build']['static_path'].lower()
+		if( 'screenshot_url' in config['build'] ):
+			self.screenshot_url = config['build']['screenshot_url'].lower()
+			self.screenshot_static_path = config['build']['screenshot_static_path'].lower()
+			if( self.screenshot_static_path[-1] != '\\' ):
+				self.screenshot_static_path += '\\'
+		self.static_url = config['build']['static_url'].lower()
+		self.source_path = config['build']['source_path'].lower()
 
 		logger.debug("scanoption")
 		logger.debug("static_path "+self.static_path)

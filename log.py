@@ -8,7 +8,7 @@ from .init import verPackage
 global logger
 
 
-def loginit(fdebug = 0, fname = verPackage):
+def loginit(fdebug = 0, fname = 'PLD', isConsole = True):
 
 	#logger = logging.getLogger(__name__)
 	#if logger.handlers:
@@ -31,14 +31,17 @@ def loginit(fdebug = 0, fname = verPackage):
 	console = logging.StreamHandler()
 	formatter = logging.Formatter('%(filename)s:%(lineno)-4d %(levelname)-6s %(message)s')
 	console.setFormatter(formatter)
-	logging.getLogger('').addHandler(console)
-	logger = logging.getLogger(__name__)
+	if( isConsole ):
+		logging.getLogger('').addHandler(console)
+	logger = logging.getLogger('ParleData')
+	#logger = logging.getLogger(__name__)
 	return logger
 
 def loglevel(fdebug = 0):
 	flevel = logging.INFO if fdebug == 0 else logging.DEBUG
 	logger.setLevel(flevel)
-	logger.info("set level to "+str(flevel))
+	#logger.info("set level to "+str(flevel))
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
+logger = logging.getLogger('ParleData')
 #logger = loginit()

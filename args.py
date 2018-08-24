@@ -1,7 +1,7 @@
 import sys, os, argparse
 import yaml
 import logging
-from .log import logger, loginit
+from .log import logger, loginit, loglevel
 
 def args():
 	parser = argparse.ArgumentParser()
@@ -14,21 +14,25 @@ def args():
 	return args
 
 class PlwConfig():
-	def __init__(self, profilename = ''):
+	def __init__(self, profile_name = '', profile_dir = '', isConsole = True):
 		#import pdb; pdb.set_trace()
 		#global logger
 
-		if( profilename == '' ):
+		if( profile_name == '' ):
 			self.profilename = 'PLDATA'
 		else:
-			self.profilename = profilename
-		logger = loginit(0, profilename)
+			self.profilename = profile_name
+		logger = loginit(0, profile_name, isConsole)
 
 		dirpath = os.getcwd()
 		logger.info("current directory is : " + dirpath)
 
-		parledatapath = os.path.dirname(os.path.realpath(__file__))+"\\templates"
-		logger.info("current directory is : " + parledatapath)
+		template = dirpath + "\\templates"
+		if( os.path.exists(template) ):
+			parledatapath = template
+		else:
+			parledatapath = os.path.dirname(os.path.realpath(__file__))+".templates\\jinja"
+		logger.info("template directory is : " + parledatapath)
 
 		self.config =  {
 		'profile' : self.profilename,
@@ -49,17 +53,27 @@ class PlwConfig():
 		}
 		}
 
-		if( profilename != ''):
-			logger.info("--- PARLEDATA BUILD WITH "+profilename)
-			self.config = self.read(profilename)
+		if( profile_name != ''):
+			if( profile_dir != '' ):
+				logger.info("--- PARLEDATA BUILD WITH "+profile_dir+profile_name)
+				self.config = self.read(profile_dir+profile_name)
+			else:
+				logger.info("--- PARLEDATA BUILD WITH "+profile_name)
+				self.config = self.read(profile_name)
 		else:
 			logger.info("--- PARLEDATA BUILD WITH CURRENT DIR")
+
+	def initload(self, profile_name, profile_dir):
+		#loglevel(0)
+		#loginit()
+		logger.info("--- PARLEDATA BUILD WITH "+profile_dir+profile_name)
+		self.config = self.read(profile_dir+profile_name)
 
 	def save(self, fname, dictcfg):
 		if( fname.find('.yaml') == -1):
 			fname += '.yaml'
 
-		with open(fname, 'w') as hfile:
+		with open(fname, 'w', encoding='utf-8') as hfile:
 			yaml.dump(dictcfg, hfile, default_flow_style=False)
 
 	def read(self, fname):
@@ -67,13 +81,14 @@ class PlwConfig():
 		if( fname.find('.yaml') == -1):
 			fname += '.yaml'
 		try:
-			with open(fname, 'r') as hfile:
+			with open(fname, 'r', encoding='utf-8') as hfile:
 				dictcfg = yaml.load(hfile)
 			self.profilename = profile
 			self.config = dictcfg
 		except FileNotFoundError as e:
-			logger.critical("Can't open configuration file "+fname)
-			dictcfg = None
+			logger.critical("No configuration file "+fname)
+			logger.critical("Use default directory")
+			return self.config
 		return dictcfg
 
 	def init(self, input_path ='', profile_path ='', static_path ='', root_url ='', fw_url ='', static_url ='', template_path ='', data_path ='', static_idx_path ='', home_url ='', fdebug = 0, webmaster = 'parladata'):

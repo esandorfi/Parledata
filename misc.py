@@ -5,6 +5,7 @@ misc.py
 import re
 import os
 import logging
+import unicodedata
 
 from selenium import webdriver
 from .log import logger
@@ -17,6 +18,18 @@ def plw_urlify(s):
 	# Replace all runs of whitespace with a single dash
 	#s = re.sub(r"\s+", '-', s)
 	return s
+
+def strip_accents(text):
+	try:
+		text = unicode(text, 'utf-8')
+	except NameError: # unicode is a default on python 3
+		pass
+	text = unicodedata.normalize('NFD', text)
+	text = text.encode('ascii', 'ignore')
+	text = text.decode("utf-8")
+	return str(text)
+
+
 
 # STRING METADATA FOR SIMULATE MARKDOWN
 #
@@ -50,12 +63,16 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		f = f[lenspace+1:]
 		logger.debug('order is ['+order+'], file : '+f)
 
-	logger.info("p " +p +" f "+f +" s "+sourcefile)
+	#logger.info("p " +p +" f "+f +" s "+sourcefile)
 
 
 	# return url with path convention
 	if f.find('.') != -1:
-		furl = f.split('.')[0]+'.html'
+		fe = f.split('.')
+		if( fe[1].lower() == 'csv' ):
+			furl = fe[0]
+		else:
+			furl = fe[0]+'.html'
 
 	else:
 		furl = f
@@ -75,8 +92,8 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		filename = sourcefile+'.html'
 	"""
 
-
-	logger.info("filename is "+filename)
+	filename = strip_accents(filename)
+	logger.debug("url filename is "+filename)
 
 	# remove source_path if any
 	if source_path != '':
@@ -109,11 +126,18 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		filename = filename[len(source_path):]
 		logger.info(" filename now just is "+filename)
 
+	urldir = ''
+	if len(sourcefile) > 0 :
+		urldir = sourcefile.replace(source_path, '')
+		urldir = re.sub(r"[^\w\\\\:.]", '-', urldir)
+		urldir = urldir.replace('\\', '/')
+
 	filename = re.sub(r"[^\w\\\\:.]", '-', filename)
 	url = (static_url + filename).replace('\\', '/')
 
 	logger.debug("url: "+url)
-	return [ url, fullfilename, furl ]
+	#import pdb; pdb.set_trace()
+	return [ url, fullfilename, furl, urldir ]
 
 
 # PlwWeb
