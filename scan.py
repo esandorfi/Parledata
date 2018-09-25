@@ -704,7 +704,12 @@ class PlwScan(object):
 			self.screenshot_static_path = config['build']['screenshot_static_path'].lower()
 			if( self.screenshot_static_path[-1] != '\\' ):
 				self.screenshot_static_path += '\\'
-		self.static_url = config['build']['static_url'].lower()
+
+		try:
+			self.static_url = config['framework']['static_url'].lower()
+		except:
+			self.static_url = config['build']['static_url'].lower()
+
 		self.source_path = config['build']['source_path'].lower()
 
 		logger.debug("scanoption")

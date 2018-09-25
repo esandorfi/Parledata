@@ -131,6 +131,7 @@ def plw_get_url(sourcefile, static_path='', static_url='', source_path=''):
 		urldir = sourcefile.replace(source_path, '')
 		urldir = re.sub(r"[^\w\\\\:.]", '-', urldir)
 		urldir = urldir.replace('\\', '/')
+		urldir = strip_accents(urldir)
 
 	filename = re.sub(r"[^\w\\\\:.]", '-', filename)
 	url = (static_url + filename).replace('\\', '/')

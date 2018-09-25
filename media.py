@@ -16,7 +16,7 @@ import csv
 from PIL import Image
 import shutil
 import re
-
+from .misc import strip_accents
 from .log import logger
 
 
@@ -155,8 +155,8 @@ class PlwMedia(object):
 
 
 						# replace strings for urls
-						newfile = re.sub(r"[^\w\\\\:.]", '-', newfile)
-						newfileth = re.sub(r"[^\w\\\\:.]", '-', newfileth)
+						newfile = strip_accents(re.sub(r"[^\w\\\\:.]", '-', newfile))
+						newfileth = strip_accents(re.sub(r"[^\w\\\\:.]", '-', newfileth))
 
 
 						imgresize = img.resize((int(nx/resizeimg), int(ny/resizeimg)), Image.BICUBIC)

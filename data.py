@@ -188,7 +188,7 @@ class PlwData(object):
 				logger.critical("zenscan: myscan .md @files")
 				return False
 			sourcedata = self.source_pathdata #htmlmetadata['sourceurl']
-			logger.info("== %s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
+			logger.debug("== %s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
 			if( self.zenscan(scanname, scanfor, scanoption, sourcedata) == False ):
 				return False
 			# check if job to do after processing this data
@@ -210,7 +210,7 @@ class PlwData(object):
 				logger.critical("zenquery: myscan .md @files")
 				return False
 			sourcedata = self.source_pathdata #htmlmetadata['sourceurl']
-			logger.info("== %s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
+			logger.debug("== %s: %s %s %s %s" % (keyname, scanname, scanfor, scanoption, sourcedata))
 			if( self.zenquery(scanname, scanfor, scanoption, sourcedata) == False ):
 				return False
 			# check if job to do after processing this data
@@ -225,21 +225,21 @@ class PlwData(object):
 		elif keyname[:7] == 'zenyaml':
 			if keydata.find('.') == -1:
 				keydata += '.yaml'
-			logger.info("== %s: %s" % (keyname, keydata))
+			logger.debug("== %s: %s" % (keyname, keydata))
 			if( self.load_yaml(keyname, keydata) == False ):
 				return False
 
 		elif keyname[:7] == 'zenjson':
 			if keydata.find('.') == -1:
 				keydata += '.json'
-			logger.info("== %s: %s" % (keyname, keydata))
+			logger.debug("== %s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, keydata) == False ):
 				return False
 
 		elif keyname[:6] == 'zenimg':
 			if keydata.find('.') == -1:
 				keydata += '.json'
-			logger.info("== %s: %s" % (keyname, keydata))
+			logger.debug("== %s: %s" % (keyname, keydata))
 			if( self.load_json(keyname, keydata) == False ):
 				return False
 
@@ -340,9 +340,19 @@ class PlwData(object):
 		html.metadata['content'] = html
 		html.metadata['url'] = self.url[0]
 		html.metadata['urldir'] = self.url[3]
+
+		words = self.url[3].split('/')
+		if( len(words) > 2 ):
+			html.metadata['urldirparent'] = '/'.join(words[0:-2])+'/'
+		else:
+			html.metadata['urldirparent'] = ''
+		#logger.info('urldir is ' +self.url[3])
+
 		html.metadata['source'] = otherfilename if otherfilename != '' else fdata
 
 		if isprofile == True:
+			html.metadata['fw'] = self.build_fw
+			"""
 			html.metadata['rooturl'] = self.root_url
 			html.metadata['fwurl'] = self.fw_url
 			html.metadata['homeurl'] = self.home_url
@@ -351,7 +361,7 @@ class PlwData(object):
 			#html.metadata['sourceurl'] = self.content_path+"/"+tmpsourceurl + "/"
 			html.metadata['staticurl'] = self.static_url
 			html.metadata['webmaster'] = self.webmaster
-
+			"""
 
 		#logger.info("sourceurl : "+html.metadata['sourceurl'])
 		#logger.info("staticurl : "+html.metadata['staticurl'])
@@ -377,6 +387,12 @@ class PlwData(object):
 		# add profile
 		if isprofile == False:
 			html.metadata["profile"] = self.profile
+		else:
+			# remove unwanted fields from profile
+			del html.metadata['pagetitle']
+			del html.metadata['urldirparent']
+			del html.metadata['urldir']
+			del html.metadata['content']
 
 		# put data in memory
 		#logger.debug(html.metadata)

@@ -70,11 +70,13 @@ class PlwInit(object):
 		#loglevel(fdebug)
 
 		# replace url
-
+		"""
 		root_url = config['build']['root_url'].replace('\\', '/')
 		fw_url = config['build']['fw_url'].replace('\\', '/')
 		static_url = config['build']['static_url'].replace('\\', '/')
 		home_url = config['build']['home_url'].replace('\\', '/')
+		media_url = config['build']['media_url'].replace('\\', '/')
+		"""
 
 		self.buildmap = config['profile']
 
@@ -117,12 +119,12 @@ class PlwInit(object):
 
 
 		self.myData.static_path = self.static # do a 2nd time after init - just to understand code better
-		self.myData.home_url = config['build']['home_url']
+
 		self.myData.source_path = config['build']['source_path']
 		self.myData.original_source_path = config['build']['source_path']
 		self.original_source_path = config['build']['source_path']
 		self.myData.source_data = config['build']['profile_path']
-		self.myData.content_path = config['build']['data_path']
+		# self.myData.content_path = config['build']['data_path']
 		# path in static dir where idx json files are generated
 
 		if( 'media_path' in config['build'] ):
@@ -134,23 +136,33 @@ class PlwInit(object):
 
 		self.myData.idxjson_path = config['build']['static_idx_path']
 
+		"""
 		# url defined for jinja templates
+		self.myData.home_url = config['build']['home_url']
 		self.myData.root_url = config['build']['root_url']
 		self.myData.fw_url = config['build']['fw_url']
-		self.myData.static_url = config['build']['static_url']
-		self.static_url = config['build']['static_url']
-		self.myData.profile = config['build'] # instead of {}
+		"""
 
+		try:
+			self.static_url = config['framework']['static_url'].lower()
+		except:
+			self.static_url = config['build']['static_url'].lower()
+		self.myData.static_url = self.static_url
+
+		"""
 		if( 'media_url' in config['build'] ):
 			self.myData.media_url = config['build']['media_url']
 		else:
 			self.myData.media_url = self.static_url + "media"
 		self.media_url = self.myData.media_url
-
-
-
-		# webmaster string in jinja head
 		self.myData.webmaster = config['build']['webmaster']
+		"""
+
+		self.myData.build_fw = config['framework']
+
+		self.myData.profile = config['build'] # instead of {}
+
+
 
 		# stop build if errors
 		self.stopIfError = True
@@ -204,7 +216,10 @@ class PlwInit(object):
 		return self.myScan.openidx(name)
 	def closeidx(self):
 		if( self.noError == True ):
-			return self.myScan.closeidx()
+			try:
+				return self.myScan.closeidx()
+			except:
+				return self.noError
 		else:
 			return self.noError
 
