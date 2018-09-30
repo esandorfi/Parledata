@@ -1,7 +1,13 @@
+# -*-coding:utf-8 -*-
 """
-Parladata
-misc.py
+plw_urlify
+strip_accents
+StringMetadata
+plw_get_url
+PlwWeb
+
 """
+
 import re
 import os
 import logging

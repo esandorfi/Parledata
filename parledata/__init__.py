@@ -8,7 +8,7 @@ __version__ = "0.5"
 
 
 # import sub modules
-from .init import PlwInit, verPackage
+from .init import PlwInit, verPackage, whoiam
 from .log import loginit, loglevel, logger
 from .misc import plw_get_url, plw_urlify
 from .args import args, PlwConfig

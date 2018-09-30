@@ -1,7 +1,11 @@
+# -*-coding:utf-8 -*-
 """
-Parladata
-log.py
+loginit
+loglevel
+variable logger
+
 """
+
 import os
 import logging
 from .init import verPackage

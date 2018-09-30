@@ -1,6 +1,8 @@
+# -*-coding:utf-8 -*-
 """
-Parladata
-init.py
+PlwInit
+get_v
+
 """
 
 # IMPORT
@@ -30,6 +32,13 @@ from logging import DEBUG, CRITICAL, INFO
 # info
 
 WEBMASTER = 'Parle Data from Parle Web'
+
+from datetime import datetime
+
+__all__ = ['whoiam', 'PlwInit', 'get_v']
+
+def whoiam():
+    print("[%s] %s" % (datetime.now(), WEBMASTER))
 
 # return dict values
 def get_v(data, *args):

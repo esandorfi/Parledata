@@ -1,4 +1,9 @@
 # BUILD SCAN FOR SCREENSHOT
+# -*-coding:utf-8 -*-
+"""
+Build individual script - run from command line
+
+"""
 
 import sys, os, argparse
 
