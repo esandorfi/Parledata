@@ -7,8 +7,10 @@ Build individual script - run from command line
 
 import sys, os, argparse
 
-enginepath = "c:\\www-parledata";
-sys.path.append(enginepath)
+#enginepath = "c:\\www-parledata";
+#sys.path.append(enginepath)
+
+
 try:
 	import parledata as zen
 except ModuleNotFoundError as e:

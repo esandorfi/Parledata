@@ -123,6 +123,9 @@ class PlwScan(object):
         return True
 
     def addidx(self, data):
+        """
+        add url to scanmap
+        """
         if( self.routeisopen == False ):
             logger.info("SCAN not opened - skip")
             return False
@@ -188,6 +191,9 @@ class PlwScan(object):
         return True
 
     def scan(self, sourcedir, scanfor = '', soption = '@none', jsonfile = "idx.json", isQuery = 0):
+        """
+        start scan
+        """
         #if sourcedir[-1:] == '\\':
         #    sourcedir = sourcedir[:-1]
         #import pdb; pdb.set_trace()
@@ -250,7 +256,10 @@ class PlwScan(object):
                     else:
                         self.breadcrump = [ self.idx ]
                 else:
-                # parent and child numerotation into list scanid as [1, 1, 2, 1...]
+                    """
+                    scanid and countid manage order position
+                    parent and child numerotation into list scanid as [1, 1, 2, 1...]
+                    """
                     if( self.parent != nbgeneration ):
                         if( nbgeneration < self.parent ):
                             # previous generation
@@ -384,6 +393,10 @@ class PlwScan(object):
         #logger.info('JSONDIR')
         self.jsondir(jsonfile, isQuery)
 
+        urljsonfile = jsonfile + '.url.json'
+        self.jsondir(urljsonfile, JSONDIR_URLLIST)
+
+
 
         return jsonfile
 
@@ -457,6 +470,8 @@ class PlwScan(object):
         else:
             info['folder'] = '/'
 
+        info['scanid'] = str(self.scanid)
+        info['order'] = self.countid
         info['nbfiles'] = nbfiles
 
         # manage deep as
@@ -651,6 +666,9 @@ class PlwScan(object):
                 else:
                     self.toclist[tocid]['scan'][i] = {}
                     self.toclist[tocid]['scan'][i] = html.metadata
+
+
+                self.urllist[fname] = tocid
             except ValueError as e:
                 logger.critical("Error as "+str(e))
                 return False
