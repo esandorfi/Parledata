@@ -23,6 +23,8 @@ from .log import logger
 from .scan import PlwScan
 from .misc import plw_get_url, StringMetadata
 
+DATAVERSION_10 = 10
+DATAVERSION_20 = 20
 
 # OBJECT PLWDATA
 #    load
@@ -31,22 +33,55 @@ class PlwData(object):
     def __init__(self, objcfg, static_path):
         self.myTemplate = objcfg  # myTemplate object
         self.static_path = static_path
-
+        self.dataversion = DATAVERSION_20
 
         self.idxcount = 0
         self.idx = {}
         self.myScan = PlwScan()
-
+        #self.data = {}
 
         self.jobending = []
         self.activedatafile = ''
         self.activedatadir = ''
 
+
+
+
+
+
     # LOAD
     #    data from argument
-    def load(self, curdata):
-        self.data = curdata
-        #print(self.data)
+    def load(self, curdata, dataversion = DATAVERSION_10):
+        """
+        prepare context for template rendering
+        DATAVERSION_10 : used for jinja2
+        DATAVERSION_20 : used for jinja2 and django
+        """
+        #logger.info(self.profile)
+        if dataversion == DATAVERSION_10:
+            self.data = curdata
+        else:
+            #model = ''
+            model = []
+            newdata = { 'data' : {}, 'profile' : {} }
+            for k, v in curdata.items():
+                #logger.info("data %s and %s..." %(k, k[:3]))
+                if( k == 'profile' or k == 'zengabarit' or k == 'url' ):
+                    newdata[k] = curdata[k]
+                    #logger.info(v)
+                elif( k[:3] == 'zen' ):
+                    newdata[k] = curdata[k]
+                    model.append(k)
+                    """
+                    if( len(model) ):
+                        model += '|'
+                    model += k
+                    """
+                else:
+                    newdata['data'][k] = curdata[k]
+
+            newdata['zenmodel'] = model
+            self.data = newdata
         return True
 
     # LOAD_CSV
@@ -253,6 +288,10 @@ class PlwData(object):
                 logger.debug("== TEMPLATE %s: %s" % (keyname, keydata))
                 self.template = keydata
 
+        elif keyname[:12] == 'zencomposant' :
+            logger.info("== COMPOSANTS TEMPLATE %s: %s" % (keyname, keydata))
+            self.templatecomposant = keydata
+
         elif( keyname[:5] == 'image'):
             htmlmetadata[keyname] = re.sub(r"[^\w\\\\:.]", '-', keydata)
             logger.debug("== IMAGE translate :" + htmlmetadata[keyname])
@@ -285,6 +324,8 @@ class PlwData(object):
     def load_markdown(self, fdata, isprofile = False, otherfilename = '', ftemplate = ''):
         # reinitialize empty template for data
         self.template = ftemplate
+        self.templatecomposant = ''
+
         del self.jobending[:] # clear jobending list (used in zenscan @build option)
         self.activedatafile = fdata # data file to analyse
 
@@ -442,7 +483,7 @@ class PlwData(object):
         else:
             tmpfile = curtemplate + ".html"
 
-        if( self.writehtml ):
+        if( self.writehtml and not isprofile ):
             myTemplatefile = next((x for x in self.myTemplate.templates_env.list_templates() if x == tmpfile ), "")
             if myTemplatefile == '':
                 logger.critical("template not found : "+tmpfile)
@@ -452,7 +493,10 @@ class PlwData(object):
         logger.debug("use template : "+myTemplatefile)
 
         # load data
-        self.load(curdata)
+        if( isprofile == True ):
+            self.load(curdata, DATAVERSION_10)
+        else:
+            self.load(curdata, DATAVERSION_20)
 
         # check if javascript file
         if( '.js' in curstatic ):
@@ -465,39 +509,35 @@ class PlwData(object):
         #logger.info("DATA URL "+self.url[0]+" OUT "+self.url[1])
 
 
-
+        #import pdb; pdb.set_trace()
         if( '.' in curstatic ):
-            #logger.info("1 "+curstatic)
+            myJsonfile = self.idxjson_path+curstatic
             if( isprofile == True ):
                 myStaticfile = self.idxjson_path+curstatic
             else:
                 myStaticfile = self.static_path+curstatic
-            myJsonfile = myStaticfile.rsplit('.', 1)[0]+".json"
-
+            myJsonfile = myJsonfile.rsplit('.', 1)[0]+".json"
             self.data['json'] = curstatic.rsplit('.', 1)[0]+".json"
+
         elif curstatic == '':
             myStaticfile = self.url[1]
             if( '.' in myStaticfile ):
                 myJsonfile = myStaticfile.rsplit('.', 1)[0]+".json"
             else:
                 myJsonfile = myStaticfile+".json"
-            if( isprofile == True ):
-                self.data['json'] = myJsonfile.replace(self.static_path, self.idxjson_path)
-                myJsonfile = self.data['json']
-            else:
-                self.data['json'] = myJsonfile
-            #logger.info("2 "+myJsonfile)
-        else:
-            #logger.info("3 "+curstatic)
-            myStaticfile = self.static_path+curstatic + ".html"
-            myJsonfile = self.static_path+curstatic + ".json"
-            self.data['json'] = curstatic+".json"
-        #logger.info("HTML FILE  "+myStaticfile)
-        #logger.info("JSON FILE "+myJsonfile)
+            self.data['json'] = myJsonfile.replace(self.static_path, self.idxjson_path)
+            myJsonfile = self.data['json']
 
+        else:
+            myStaticfile = self.static_path+curstatic + ".html"
+            myJsonfile = self.idxjson_path+curstatic + ".json"
+            self.data['json'] = curstatic+".json"
+
+        #logger.info("JSON FILE "+myJsonfile)
+        #import pdb; pdb.set_trace()
 
         if( isprofile == True ):
-            #import pdb; pdb.set_trace()
+
             self.profile = self.data
             self.data = { "profile" : self.profile }
             logger.debug("initialize profile in json data")
@@ -508,10 +548,8 @@ class PlwData(object):
 
         # generate static html file from data and template
         if( self.writehtml ):
-            try:
-                myTemplate = self.myTemplate.templates_env.get_template(myTemplatefile)
-                html = myTemplate.render(self.data)
-                #print(html)
+            html = self.renderHtmlFromTemplate(myTemplatefile)
+            if len(html):
                 try:
                     myFile = open(myStaticfile, "w", encoding='utf-8')
                 except FileNotFoundError as e:
@@ -527,27 +565,80 @@ class PlwData(object):
                 myFile.close()
                 myFileinfo = os.stat(myStaticfile)
                 logger.info("WRITE > %s : %d bytes" % (myStaticfile, myFileinfo.st_size))
-
-            except TemplateNotFound as e:
-                logger.critical("ERROR JINJA template not found : "+str(e))
-                return False
-
-            except TemplateSyntaxError as e:
-                logger.critical("ERROR JINJA template syntax error : "+str(e))
-                #return False
-                #continue jinja exception to get line number information
-                raise
-            except UndefinedError as e:
-                logger.critical("ERROR JINJA variable not defined : "+str(e))
-                raise
-            except ValueError as e:
-                logger.critical("ERROR in generate html "+str(e))
-                return False
+            #else:
+            #    return False
 
         # generate json data file
-        if writeJson is True:
+        # if writeJson is True:
+        if writeJson:
+
+            #
+            self.addHtmlComposant();
             self.writejson(myJsonfile)
+
         return True
+
+    def addHtmlComposant(self):
+        """
+        generate html from zencomposant attributes in dict for json file
+        used for ajax or rest api calls
+        """
+        if len(self.templatecomposant) == 0:
+            return ''
+        #import pdb; pdb.set_trace()
+        templatefile = self.findTemplateFilename(self.templatecomposant)
+        html = self.renderHtmlFromTemplate(templatefile)
+        if len(html):
+            self.data['zencomposant'] = html
+
+
+    def renderHtmlFromTemplate(self, myTemplatefile):
+        """
+        render html from template and context data from SHARED variable : self.data
+        """
+        if len(myTemplatefile) == 0:
+            return ''
+
+        try:
+            html = ''
+            myTemplate = self.myTemplate.templates_env.get_template(myTemplatefile)
+            html = myTemplate.render(self.data)
+        except TemplateNotFound as e:
+            logger.critical("ERROR JINJA template not found : "+str(e))
+        except TemplateSyntaxError as e:
+            logger.critical("ERROR JINJA template syntax error : "+str(e))
+            raise
+        except UndefinedError as e:
+            logger.critical("ERROR JINJA variable not defined : "+str(e))
+            logger.critical(self.data)
+            raise
+        except ValueError as e:
+            logger.critical("ERROR in generate html "+str(e))
+
+        return html
+
+    def findTemplateFilename(self, tmpfile):
+        """
+        get template file from jinja template environnement
+        based on input file name passed without complete subdir structure
+        """
+        # if no template specified, return
+        if len(tmpfile) == 0:
+            return ''
+
+        # if template from attributes doesn't have extension
+        # very quick test
+        if not( '.' in tmpfile ):
+            tmpfile += ".html"
+
+        # retrieve template file from jinja
+        myTemplatefile = next((x for x in self.myTemplate.templates_env.list_templates() if x == tmpfile ), "")
+        if myTemplatefile == '':
+            logger.critical("composant template not found : "+tmpfile)
+
+        return myTemplatefile
+
+
 
     # CHECK IF JOB ENDING IS ON
     def ending(self, scanobj):
@@ -614,7 +705,7 @@ class PlwData(object):
                                             return False
                                         if self.write(self.data, self.template) == False:
                                             return False
-                                        
+
                                         scanobj.addidx(self.data)
                                         i += 1
 

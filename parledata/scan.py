@@ -393,8 +393,8 @@ class PlwScan(object):
         #logger.info('JSONDIR')
         self.jsondir(jsonfile, isQuery)
 
-        urljsonfile = jsonfile + '.url.json'
-        self.jsondir(urljsonfile, JSONDIR_URLLIST)
+        #urljsonfile = jsonfile + '.url'
+        #self.jsondir(urljsonfile, JSONDIR_URLLIST)
 
 
 
@@ -406,13 +406,17 @@ class PlwScan(object):
         logger.debug(self.tochtml)
 
     def jsondir(self, fout, isQuery = 0):
-        logger.debug("JSON")
+        logger.debug("JSON with " + fout)
         if( isQuery == JSONDIR_ZENQUERY ): # from zenquery
             data = self.toclist['1']['scan']
-        elif( isQuery == JSONDIR_URLLIST ):
-            data = self.urllist
+        #elif( isQuery == JSONDIR_URLLIST ):
+        #    data = self.urllist
         else:
             data = self.toclist
+
+        #if len(self.urllist):
+        #    data['source'] = self.urllist
+
         try:
             myFile = open(fout, "w", encoding='utf-8')
         except FileNotFoundError as e:
